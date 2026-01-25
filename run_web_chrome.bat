@@ -1,5 +1,5 @@
 @echo off
-REM Script per lanciare l'app Flutter come web app in Chrome
+REM Script per lanciare l'app Flutter come web app
 
 echo ========================================
 echo  Match Recording - Web App Launcher
@@ -14,13 +14,12 @@ flutter pub get
 echo.
 
 echo Build web app in progress...
-flutter build web --web-renderer html
+flutter build web
 echo.
 
-echo Avvio dell'app in Chrome...
-start chrome http://localhost:8080
-
+echo Avvio del server web (porta 8080)...
+echo Apri il browser e vai a: http://localhost:8080
 echo.
-echo Avvio del server web...
+
 flutter run -d web-server --web-port=8080
 pause
