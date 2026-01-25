@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSCameraUsageDescription</key>
+	<string>L'app ha bisogno di accedere alla fotocamera per registrare le partite di calcio.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>L'app ha bisogno di accedere al microfono per registrare l'audio durante la partita.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>L'app ha bisogno di accedere alla libreria foto per salvare i video registrati.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>L'app ha bisogno di accedere alla libreria foto per salvare i video registrati.</string>
+</dict>
+</plist>
