@@ -1,3 +1,7 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../controllers/match_controller.dart';
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -56,9 +60,9 @@ class HomeScreen extends StatelessWidget {
                 () => Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: matchController.isRecording.value ? Colors.red.shade50 : Colors.gray.shade100,
+                    color: matchController.isRecording.value ? Colors.red.shade50 : Colors.grey.shade100,
                     border: Border.all(
-                      color: matchController.isRecording.value ? Colors.red : Colors.gray,
+                      color: matchController.isRecording.value ? Colors.red : Colors.grey,
                       width: 2,
                     ),
                     borderRadius: BorderRadius.circular(12),
@@ -69,7 +73,7 @@ class HomeScreen extends StatelessWidget {
                         width: 12,
                         height: 12,
                         decoration: BoxDecoration(
-                          color: matchController.isRecording.value ? Colors.red : Colors.gray,
+                          color: matchController.isRecording.value ? Colors.red : Colors.grey,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -83,7 +87,7 @@ class HomeScreen extends StatelessWidget {
                                   ? 'Registrazione in corso'
                                   : 'Pronto per registrare',
                               style: const TextStyle(
-                                fontWeight: FontWeight.semibold,
+                                fontWeight: FontWeight.w600,
                                 fontSize: 16,
                               ),
                             ),
@@ -156,7 +160,7 @@ class HomeScreen extends StatelessWidget {
                         child: Text(
                           'Highlights marcati: ${matchController.highlights.length}',
                           style: const TextStyle(
-                            fontWeight: FontWeight.semibold,
+                            fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
                         ),
@@ -221,7 +225,7 @@ class HomeScreen extends StatelessWidget {
           value,
           style: const TextStyle(
             fontSize: 14,
-            fontWeight: FontWeight.semibold,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],

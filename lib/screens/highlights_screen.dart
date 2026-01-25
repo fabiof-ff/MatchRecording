@@ -1,3 +1,8 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import '../controllers/match_controller.dart';
+
 class HighlightsScreen extends StatelessWidget {
   const HighlightsScreen({Key? key}) : super(key: key);
 

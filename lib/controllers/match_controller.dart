@@ -1,3 +1,8 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../models/highlight.dart';
+
 class MatchController extends GetxController {
   // Match data
   final isRecording = false.obs;

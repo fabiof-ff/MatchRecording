@@ -1,3 +1,5 @@
+import 'package:uuid/uuid.dart';
+
 class Highlight {
   final String id;
   final Duration timestamp;
