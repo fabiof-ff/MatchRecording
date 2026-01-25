@@ -1,13 +1,14 @@
 {
-    "name": "match_recording",
-    "short_name": "match_recording",
+    "name": "Match Recording",
+    "short_name": "Match Recording",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "App web per registrare e analizzare partite di calcio",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
+    "scope": "/",
     "icons": [
         {
             "src": "icons/Icon-192.png",
