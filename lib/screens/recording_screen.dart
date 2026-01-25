@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:camera/camera.dart';
 import '../controllers/match_controller.dart';
+import '../controllers/camera_controller.dart';
 
 class RecordingScreen extends StatefulWidget {
   @override
@@ -9,31 +10,18 @@ class RecordingScreen extends StatefulWidget {
 }
 
 class _RecordingScreenState extends State<RecordingScreen> {
-  late CameraController _cameraController;
-  late Future<void> _initializeControllerFuture;
+  late CameraRecordingController _cameraRecordingController;
 
   @override
   void initState() {
     super.initState();
-    _initializeCamera();
-  }
-
-  Future<void> _initializeCamera() async {
-    final cameras = await availableCameras();
-    final firstCamera = cameras.first;
-
-    _cameraController = CameraController(
-      firstCamera,
-      ResolutionPreset.high,
-    );
-
-    _initializeControllerFuture = _cameraController.initialize();
-    setState(() {});
+    // Inizializza il camera controller
+    _cameraRecordingController = Get.put(CameraRecordingController());
   }
 
   @override
   void dispose() {
-    _cameraController.dispose();
+    // Non dispose qui perché GetX lo farà automaticamente
     super.dispose();
   }
 
@@ -61,14 +49,22 @@ class _RecordingScreenState extends State<RecordingScreen> {
             },
           ),
         ),
-        body: FutureBuilder<void>(
-          future: _initializeControllerFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              return Stack(
-                children: [
-                  // Camera preview
-                  CameraPreview(_cameraController),
+        body: Obx(
+          () {
+            if (!_cameraRecordingController.isInitialized.value) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+
+            return FutureBuilder<void>(
+              future: _cameraRecordingController.initializeCameraFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return Stack(
+                    children: [
+                      // Camera preview
+                      CameraPreview(_cameraRecordingController.cameraController),
 
                   // Top recording indicator
                   Positioned(
@@ -349,11 +345,15 @@ class _RecordingScreenState extends State<RecordingScreen> {
                               Expanded(
                                 child: Obx(
                                   () => ElevatedButton.icon(
-                                    onPressed: () {
+                                    onPressed: () async {
                                       if (matchController.isRecording.value) {
+                                        // Ferma sia il match timer che la video registrazione
                                         matchController.stopRecording();
+                                        await _cameraRecordingController.stopVideoRecording();
                                       } else {
+                                        // Avvia sia il match timer che la video registrazione
                                         matchController.startRecording();
+                                        await _cameraRecordingController.startVideoRecording();
                                       }
                                     },
                                     icon: Icon(matchController.isRecording.value ? Icons.stop : Icons.circle),
@@ -376,6 +376,8 @@ class _RecordingScreenState extends State<RecordingScreen> {
             } else {
               return const Center(child: CircularProgressIndicator());
             }
+          },
+            );
           },
         ),
       ),
