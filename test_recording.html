@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ Match Recording - Test di Registrazione</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .panel h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel h3 {
+            color: #555;
+            margin: 15px 0 10px;
+            font-size: 1.1em;
+        }
+
+        /* Overlay Video Preview */
+        .video-preview {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3em;
+        }
+
+        .video-preview.recording {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            pointer-events: none;
+        }
+
+        .overlay-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .timer {
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 2.5em;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .timer.recording {
+            color: #ff4444;
+            animation: blink 0.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.6; }
+        }
+
+        .status-badge {
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .status-badge.recording {
+            background: #ff4444;
+            animation: pulse 1s infinite;
+        }
+
+        .scoreboard {
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 150px;
+        }
+
+        .scoreboard .score {
+            font-size: 2.5em;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
+
+        .scoreboard .teams {
+            font-size: 0.8em;
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+            grid-column: span 2;
+            font-size: 1.2em;
+            padding: 15px;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary.recording {
+            background: #ff4444;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #e8e8e8;
+            border-color: #667eea;
+        }
+
+        .btn-success {
+            background: #52c41a;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #45a817;
+        }
+
+        .btn-danger {
+            background: #ff4d4f;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ff7875;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.9em;
+        }
+
+        .score-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .score-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .score-group h4 {
+            color: #667eea;
+            text-align: center;
+        }
+
+        .score-display {
+            font-size: 2em;
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+
+        .score-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .score-buttons .btn {
+            flex: 1;
+            padding: 10px;
+            font-size: 1.2em;
+        }
+
+        /* Highlights */
+        .highlights-list {
+            background: #f9f9f9;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 0;
+            margin-bottom: 15px;
+        }
+
+        .highlight-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .highlight-item:hover {
+            background: #f0f0f0;
+        }
+
+        .highlight-item:last-child {
+            border-bottom: none;
+        }
+
+        .highlight-time {
+            font-weight: bold;
+            color: #667eea;
+            font-family: 'Courier New', monospace;
+        }
+
+        .highlight-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .alert-info {
+            background: #e6f7ff;
+            color: #0050b3;
+            border-left: 4px solid #1890ff;
+        }
+
+        .alert-success {
+            background: #f6ffed;
+            color: #274e0f;
+            border-left: 4px solid #52c41a;
+        }
+
+        .alert-warning {
+            background: #fffbe6;
+            color: #8b6914;
+            border-left: 4px solid #faad14;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .button-row .btn {
+            flex: 1;
+        }
+
+        .state-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .state-indicator.idle {
+            background: #d9d9d9;
+        }
+
+        .state-indicator.recording {
+            background: #ff4444;
+            animation: pulse 1s infinite;
+        }
+
+        .export-progress {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 8px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-primary {
+                grid-column: span 1;
+            }
+
+            .full-width {
+                grid-column: span 1;
+            }
+
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .video-preview {
+                font-size: 2em;
+            }
+
+            .timer {
+                font-size: 1.8em;
+                min-width: 120px;
+            }
+
+            .scoreboard .score {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚽ Match Recording App</h1>
+            <p>Test di Registrazione Completo</p>
+        </div>
+
+        <div class="main-grid">
+            <!-- Panel Sinistra: Registrazione -->
+            <div class="panel">
+                <h2>📹 Registrazione</h2>
+
+                <!-- Video Preview con Overlay -->
+                <div class="video-preview" id="videoPreview">
+                    <div class="overlay">
+                        <div class="overlay-top">
+                            <div class="timer" id="timer">00:00</div>
+                            <div class="status-badge" id="statusBadge">READY</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div class="scoreboard">
+                                <div>Match Time</div>
+                                <div class="score" id="scoreDisplay">0 - 0</div>
+                                <div class="teams">
+                                    <div>T1</div>
+                                    <div>T2</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controlli Registrazione -->
+                <div class="controls">
+                    <button class="btn btn-primary" id="recordBtn" onclick="toggleRecording()">
+                        ⏹️ INIZIA REGISTRAZIONE
+                    </button>
+                </div>
+
+                <!-- Controlli Punteggio -->
+                <h3>📊 Punteggio</h3>
+                <div class="score-controls">
+                    <div class="score-group">
+                        <h4>Squadra 1</h4>
+                        <div class="score-display" id="team1Score">0</div>
+                        <div class="score-buttons">
+                            <button class="btn btn-secondary btn-small" onclick="addGoal(1)">+1</button>
+                            <button class="btn btn-danger btn-small" onclick="removeGoal(1)">-1</button>
+                        </div>
+                    </div>
+                    <div class="score-group">
+                        <h4>Squadra 2</h4>
+                        <div class="score-display" id="team2Score">0</div>
+                        <div class="score-buttons">
+                            <button class="btn btn-secondary btn-small" onclick="addGoal(2)">+1</button>
+                            <button class="btn btn-danger btn-small" onclick="removeGoal(2)">-1</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tasto Highlight -->
+                <h3>⭐ Highlights</h3>
+                <button class="btn btn-success full-width" id="highlightBtn" onclick="markHighlight()" disabled>
+                    ⭐ MARCA HIGHLIGHT
+                </button>
+            </div>
+
+            <!-- Panel Destra: Highlights & Export -->
+            <div class="panel">
+                <h2>📋 Highlights & Export</h2>
+
+                <div id="alertZone"></div>
+
+                <h3>Highlights Marcati</h3>
+                <div class="highlights-list" id="highlightsList">
+                    <div style="padding: 20px; text-align: center; color: #999;">
+                        Nessun highlight marcato
+                    </div>
+                </div>
+
+                <!-- Statistiche -->
+                <div class="highlight-stats">
+                    <div class="stat">
+                        <div class="stat-value" id="totalHighlights">0</div>
+                        <div class="stat-label">Highlights</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="totalTime">00:00</div>
+                        <div class="stat-label">Durata</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="matchScore">0-0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                </div>
+
+                <!-- Pulsanti Azioni -->
+                <div class="button-row">
+                    <button class="btn btn-success" id="exportBtn" onclick="exportVideo()">
+                        💾 EXPORT MP4
+                    </button>
+                    <button class="btn btn-danger" id="clearBtn" onclick="clearHighlights()" disabled>
+                        🗑️ CANCELLA TUTTI
+                    </button>
+                </div>
+
+                <!-- Export Progress -->
+                <div class="export-progress" id="exportProgress">
+                    <div class="progress-text" id="exportText">Esportazione in corso...</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+
+                <!-- Test Results -->
+                <h3 style="margin-top: 20px;">📊 Risultati Test</h3>
+                <div class="alert alert-info">
+                    <span class="state-indicator" id="stateIndicator"></span>
+                    Stato: <span id="stateText">Pronto per registrazione</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Full Width Summary Panel -->
+        <div class="panel">
+            <h2>🎯 Riepilogo Registrazione</h2>
+            <div id="summaryContent">
+                <p style="color: #999; text-align: center;">
+                    Avvia una registrazione per visualizzare il riepilogo
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State Management
+        let state = {
+            recording: false,
+            elapsedTime: 0,
+            team1Score: 0,
+            team2Score: 0,
+            highlights: [],
+            timerInterval: null,
+            sessionStartTime: null
+        };
+
+        // Initialize State Indicator
+        updateStateIndicator();
+
+        // Format time as MM:SS
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        // Toggle Recording
+        function toggleRecording() {
+            if (state.recording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        }
+
+        function startRecording() {
+            state.recording = true;
+            state.elapsedTime = 0;
+            state.highlights = [];
+            state.sessionStartTime = Date.now();
+            state.team1Score = 0;
+            state.team2Score = 0;
+
+            // Update UI
+            document.getElementById('recordBtn').textContent = '⏹️ FERMA REGISTRAZIONE';
+            document.getElementById('recordBtn').classList.add('recording');
+            document.getElementById('videoPreview').classList.add('recording');
+            document.getElementById('highlightBtn').disabled = false;
+            document.getElementById('clearBtn').disabled = true;
+            document.getElementById('exportBtn').disabled = true;
+            document.getElementById('statusBadge').textContent = 'REC';
+            document.getElementById('statusBadge').classList.add('recording');
+            
+            updateStateIndicator('Registrazione in corso...', true);
+            showAlert('info', '✓ Registrazione avviata!');
+
+            // Start timer
+            if (state.timerInterval) clearInterval(state.timerInterval);
+            state.timerInterval = setInterval(() => {
+                state.elapsedTime++;
+                document.getElementById('timer').textContent = formatTime(state.elapsedTime);
+            }, 1000);
+        }
+
+        function stopRecording() {
+            state.recording = false;
+            if (state.timerInterval) clearInterval(state.timerInterval);
+
+            // Update UI
+            document.getElementById('recordBtn').textContent = '▶️ INIZIA REGISTRAZIONE';
+            document.getElementById('recordBtn').classList.remove('recording');
+            document.getElementById('videoPreview').classList.remove('recording');
+            document.getElementById('highlightBtn').disabled = true;
+            document.getElementById('clearBtn').disabled = state.highlights.length === 0;
+            document.getElementById('exportBtn').disabled = state.highlights.length === 0;
+            document.getElementById('statusBadge').textContent = 'READY';
+            document.getElementById('statusBadge').classList.remove('recording');
+            
+            updateStateIndicator('Registrazione terminata');
+            showAlert('success', `✓ Registrazione fermata! Durata: ${formatTime(state.elapsedTime)}`);
+            updateSummary();
+        }
+
+        // Score Management
+        function addGoal(team) {
+            if (team === 1) state.team1Score++;
+            else state.team2Score++;
+            updateScore();
+        }
+
+        function removeGoal(team) {
+            if (team === 1 && state.team1Score > 0) state.team1Score--;
+            else if (team === 2 && state.team2Score > 0) state.team2Score--;
+            updateScore();
+        }
+
+        function updateScore() {
+            document.getElementById('team1Score').textContent = state.team1Score;
+            document.getElementById('team2Score').textContent = state.team2Score;
+            document.getElementById('scoreDisplay').textContent = 
+                `${state.team1Score} - ${state.team2Score}`;
+            document.getElementById('matchScore').textContent = 
+                `${state.team1Score}-${state.team2Score}`;
+        }
+
+        // Highlight Management
+        function markHighlight() {
+            if (!state.recording) return;
+            
+            const highlight = {
+                id: state.highlights.length + 1,
+                time: state.elapsedTime,
+                timestamp: formatTime(state.elapsedTime),
+                score: `${state.team1Score}-${state.team2Score}`,
+                date: new Date().toLocaleString('it-IT')
+            };
+
+            state.highlights.push(highlight);
+            updateHighlightsList();
+            showAlert('success', `⭐ Highlight marcato al ${highlight.timestamp}!`);
+        }
+
+        function updateHighlightsList() {
+            const list = document.getElementById('highlightsList');
+            
+            if (state.highlights.length === 0) {
+                list.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">Nessun highlight marcato</div>';
+            } else {
+                list.innerHTML = state.highlights.map(h => `
+                    <div class="highlight-item">
+                        <div>
+                            <span class="highlight-time">${h.timestamp}</span>
+                            <span style="margin-left: 10px; color: #666;">(${h.score})</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('totalHighlights').textContent = state.highlights.length;
+            
+            const totalDuration = state.highlights.length * 10; // 10 secondi per highlight
+            document.getElementById('totalTime').textContent = formatTime(totalDuration);
+        }
+
+        function clearHighlights() {
+            if (confirm('Sei sicuro di voler cancellare tutti gli highlights?')) {
+                state.highlights = [];
+                updateHighlightsList();
+                document.getElementById('clearBtn').disabled = true;
+                document.getElementById('exportBtn').disabled = true;
+                showAlert('warning', '🗑️ Tutti gli highlights sono stati cancellati');
+            }
+        }
+
+        // Export
+        function exportVideo() {
+            if (state.highlights.length === 0) {
+                showAlert('warning', '⚠️ Nessun highlight da esportare!');
+                return;
+            }
+
+            document.getElementById('exportProgress').style.display = 'block';
+            document.getElementById('exportBtn').disabled = true;
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 25;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    
+                    document.getElementById('progressFill').style.width = '100%';
+                    document.getElementById('exportText').textContent = 
+                        `✓ Export completato! File: match_${Date.now()}.mp4`;
+                    
+                    setTimeout(() => {
+                        document.getElementById('exportProgress').style.display = 'none';
+                        document.getElementById('exportBtn').disabled = false;
+                        showAlert('success', 
+                            `💾 Video esportato con successo!\n` +
+                            `Highlights: ${state.highlights.length}\n` +
+                            `Durata: ${formatTime(state.highlights.length * 10)}\n` +
+                            `File: match_${Date.now()}.mp4`
+                        );
+                    }, 2000);
+                }
+                document.getElementById('progressFill').style.width = progress + '%';
+                document.getElementById('exportText').textContent = 
+                    `Esportazione in corso... ${Math.round(progress)}%`;
+            }, 300);
+        }
+
+        // Alert System
+        function showAlert(type, message) {
+            const zone = document.getElementById('alertZone');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            zone.appendChild(alert);
+
+            setTimeout(() => alert.remove(), 5000);
+        }
+
+        // State Indicator
+        function updateStateIndicator(text = 'Pronto per registrazione', recording = false) {
+            const indicator = document.getElementById('stateIndicator');
+            const stateText = document.getElementById('stateText');
+            
+            if (recording) {
+                indicator.className = 'state-indicator recording';
+            } else {
+                indicator.className = 'state-indicator idle';
+            }
+            stateText.textContent = text;
+        }
+
+        // Summary
+        function updateSummary() {
+            const summaryContent = document.getElementById('summaryContent');
+            
+            if (state.highlights.length === 0 && !state.recording) {
+                summaryContent.innerHTML = '<p style="color: #999; text-align: center;">Nessuna registrazione completata</p>';
+                return;
+            }
+
+            const totalDuration = state.elapsedTime;
+            const highlightDuration = state.highlights.length * 10;
+            const coverage = (highlightDuration / (totalDuration || 1) * 100).toFixed(1);
+
+            summaryContent.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div style="padding: 15px; background: #f0f0f0; border-radius: 8px;">
+                        <div style="color: #666; font-size: 0.9em;">Durata Registrazione</div>
+                        <div style="font-size: 2em; font-weight: bold; color: #667eea; margin-top: 5px;">
+                            ${formatTime(totalDuration)}
+                        </div>
+                    </div>
+                    <div style="padding: 15px; background: #f0f0f0; border-radius: 8px;">
+                        <div style="color: #666; font-size: 0.9em;">Highlights Marcati</div>
+                        <div style="font-size: 2em; font-weight: bold; color: #52c41a; margin-top: 5px;">
+                            ${state.highlights.length}
+                        </div>
+                    </div>
+                    <div style="padding: 15px; background: #f0f0f0; border-radius: 8px;">
+                        <div style="color: #666; font-size: 0.9em;">Score Finale</div>
+                        <div style="font-size: 2em; font-weight: bold; color: #ff7a45; margin-top: 5px;">
+                            ${state.team1Score} - ${state.team2Score}
+                        </div>
+                    </div>
+                    <div style="padding: 15px; background: #f0f0f0; border-radius: 8px;">
+                        <div style="color: #666; font-size: 0.9em;">Coverage Highlight</div>
+                        <div style="font-size: 2em; font-weight: bold; color: #faad14; margin-top: 5px;">
+                            ${coverage}%
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
+                    <h4 style="margin-bottom: 10px;">Dettagli Highlights:</h4>
+                    ${state.highlights.map(h => `
+                        <div style="padding: 8px 0; border-bottom: 1px solid #eee; font-size: 0.9em;">
+                            <strong>${h.timestamp}</strong> - Score: ${h.score}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Inizializzazione
+        updateScore();
+        updateHighlightsList();
+    </script>
+</body>
+</html>
