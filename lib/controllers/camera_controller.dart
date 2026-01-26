@@ -53,6 +53,25 @@ class CameraRecordingController extends GetxController {
   String getVideoSaveDirectory() {
     return videosSaveDirectory.value;
   }
+  
+  /// Aggiorna i dati dell'overlay per la registrazione web
+  void updateOverlay({
+    String? team1Name,
+    String? team2Name,
+    int? team1Score,
+    int? team2Score,
+    String? matchTime,
+  }) {
+    if (kIsWeb && _webRecorder != null) {
+      _webRecorder!.updateOverlay(
+        team1Name: team1Name,
+        team2Name: team2Name,
+        team1Score: team1Score,
+        team2Score: team2Score,
+        matchTime: matchTime,
+      );
+    }
+  }
 
   /// Inizializza la camera disponibile
   Future<void> initializeCamera() async {

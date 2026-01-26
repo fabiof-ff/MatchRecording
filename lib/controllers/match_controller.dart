@@ -16,22 +16,39 @@ class MatchController extends GetxController {
   final recordedVideoPath = ''.obs;
 
   Timer? _timer;
-  late CameraRecordingController _cameraController;
+  CameraRecordingController? _cameraController;
 
-  @override
-  void onInit() {
-    super.onInit();
-    // Ottieni il camera controller se disponibile
+  void setCameraController(CameraRecordingController controller) {
+    _cameraController = controller;
+    print('✅ CameraRecordingController collegato al MatchController');
+  }
+  
+  void _updateOverlay() {
+    if (_cameraController == null) {
+      print('⚠️ _cameraController non disponibile');
+      return;
+    }
     try {
-      _cameraController = Get.find<CameraRecordingController>();
+      print('🔄 _updateOverlay chiamato: ${team1Name.value} ${team1Score.value} - ${team2Score.value} ${team2Name.value} | ${formatMatchTime(matchTime.value)}');
+      _cameraController!.updateOverlay(
+        team1Name: team1Name.value,
+        team2Name: team2Name.value,
+        team1Score: team1Score.value,
+        team2Score: team2Score.value,
+        matchTime: formatMatchTime(matchTime.value),
+      );
     } catch (e) {
-      print('⚠️ CameraRecordingController non disponibile');
+      print('❌ Errore in _updateOverlay: $e');
     }
   }
 
   void startRecording() {
     isRecording.value = true;
     matchTime.value = Duration.zero;
+    
+    // Inizializza l'overlay con i valori correnti
+    _updateOverlay();
+    
     _startTimer();
     
     // Avvia registrazione video della camera
@@ -53,20 +70,24 @@ class MatchController extends GetxController {
   void _startTimer() {
     _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       matchTime.value = Duration(milliseconds: matchTime.value.inMilliseconds + 100);
+      // Aggiorna l'overlay ad ogni tick per garantire sincronizzazione
+      _updateOverlay();
     });
   }
 
   Future<void> _startVideoRecording() async {
+    if (_cameraController == null) return;
     try {
-      await _cameraController.startVideoRecording();
+      await _cameraController!.startVideoRecording();
     } catch (e) {
       print('⚠️ Errore avvio registrazione video: $e');
     }
   }
 
   Future<void> _stopVideoRecording() async {
+    if (_cameraController == null) return;
     try {
-      final videoPath = await _cameraController.stopVideoRecording();
+      final videoPath = await _cameraController!.stopVideoRecording();
       if (videoPath != null) {
         recordedVideoPath.value = videoPath;
         print('✅ Video salvato: $videoPath');
@@ -82,6 +103,7 @@ class MatchController extends GetxController {
       return;
     }
     team1Score.value++;
+    _updateOverlay();
     print('⚽ Gol ${team1Name.value}! Score: ${team1Score.value} - ${team2Score.value}');
     Get.snackbar('Gol!', '${team1Name.value} segna!', backgroundColor: Colors.green);
   }
@@ -92,16 +114,23 @@ class MatchController extends GetxController {
       return;
     }
     team2Score.value++;
+    _updateOverlay();
     print('⚽ Gol ${team2Name.value}! Score: ${team1Score.value} - ${team2Score.value}');
     Get.snackbar('Gol!', '${team2Name.value} segna!', backgroundColor: Colors.green);
   }
 
   void subtractGoalTeam1() {
-    if (team1Score.value > 0) team1Score.value--;
+    if (team1Score.value > 0) {
+      team1Score.value--;
+      _updateOverlay();
+    }
   }
 
   void subtractGoalTeam2() {
-    if (team2Score.value > 0) team2Score.value--;
+    if (team2Score.value > 0) {
+      team2Score.value--;
+      _updateOverlay();
+    }
   }
 
   void markHighlight() {

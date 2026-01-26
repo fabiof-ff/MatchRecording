@@ -5,16 +5,47 @@ import 'package:get/get.dart';
 
 /// Controller per la registrazione video su piattaforma web
 class WebVideoRecorder {
-  html.MediaStream? _mediaStream;
+  html.MediaStream? _cameraStream;
+  html.MediaStream? _canvasStream;
   html.MediaRecorder? _mediaRecorder;
   final List<html.Blob> _recordedChunks = [];
   bool _isRecording = false;
   
-  /// Avvia la registrazione video web
+  html.CanvasElement? _canvas;
+  html.VideoElement? _videoElement;
+  Timer? _drawTimer;
+  int _frameCount = 0;
+  
+  // Dati overlay
+  String team1Name = 'Squadra 1';
+  String team2Name = 'Squadra 2';
+  int team1Score = 0;
+  int team2Score = 0;
+  String matchTime = '00:00';
+  
+  /// Aggiorna i dati dell'overlay
+  void updateOverlay({
+    String? team1Name,
+    String? team2Name,
+    int? team1Score,
+    int? team2Score,
+    String? matchTime,
+  }) {
+    if (team1Name != null) this.team1Name = team1Name;
+    if (team2Name != null) this.team2Name = team2Name;
+    if (team1Score != null) this.team1Score = team1Score;
+    if (team2Score != null) this.team2Score = team2Score;
+    if (matchTime != null) this.matchTime = matchTime;
+    
+    // Debug: stampa i valori aggiornati
+    print('🎯 Overlay values: $team1Name $team1Score - $team2Score $team2Name | $matchTime');
+  }
+  
+  /// Avvia la registrazione video web con overlay
   Future<void> startRecording() async {
     try {
       // Richiedi accesso alla camera e microfono
-      _mediaStream = await html.window.navigator.mediaDevices?.getUserMedia({
+      _cameraStream = await html.window.navigator.mediaDevices?.getUserMedia({
         'video': {
           'width': {'ideal': 1920},
           'height': {'ideal': 1080},
@@ -22,12 +53,63 @@ class WebVideoRecorder {
         'audio': true,
       });
 
-      if (_mediaStream == null) {
+      if (_cameraStream == null) {
         throw Exception('Impossibile accedere alla camera');
       }
 
-      // Crea MediaRecorder
-      _mediaRecorder = html.MediaRecorder(_mediaStream!, {
+      // Crea video element per lo stream della camera
+      _videoElement = html.VideoElement()
+        ..autoplay = true
+        ..muted = true
+        ..srcObject = _cameraStream;
+
+      // Attendi che il video sia pronto e avvialo
+      await _videoElement!.onLoadedMetadata.first;
+      await _videoElement!.play();
+      
+      // Attendi un frame per essere sicuri che il video stia effettivamente riproducendo
+      await Future.delayed(const Duration(milliseconds: 100));
+      
+      // Crea canvas per composizione video + overlay
+      final videoWidth = _videoElement!.videoWidth;
+      final videoHeight = _videoElement!.videoHeight;
+      
+      print('📐 Dimensioni video: ${videoWidth}x${videoHeight}');
+      
+      _canvas = html.CanvasElement(width: videoWidth, height: videoHeight);
+      final ctx = _canvas!.context2D;
+
+      // Cattura stream dal canvas PRIMA di iniziare a disegnare
+      // captureStream() senza parametri cattura ogni volta che il canvas viene modificato
+      _canvasStream = _canvas!.captureStream();
+      
+      // Aggiungi audio track dalla camera
+      final audioTracks = _cameraStream!.getAudioTracks();
+      if (audioTracks.isNotEmpty) {
+        _canvasStream!.addTrack(audioTracks.first);
+      }
+
+      // Disegna frame con overlay ripetutamente (30 FPS)
+      _drawTimer = Timer.periodic(const Duration(milliseconds: 33), (_) {
+        if (_canvas == null || _videoElement == null || ctx == null) return;
+        
+        // Verifica che il video sia in riproduzione
+        if (_videoElement!.paused || _videoElement!.ended) {
+          return;
+        }
+        
+        // Pulisci il canvas
+        ctx.clearRect(0, 0, videoWidth, videoHeight);
+        
+        // Disegna il video
+        ctx.drawImageScaled(_videoElement!, 0, 0, videoWidth, videoHeight);
+        
+        // Disegna overlay (leggerà i valori aggiornati delle variabili)
+        _drawOverlay(ctx, videoWidth, videoHeight);
+      });
+
+      // Crea MediaRecorder dal canvas stream
+      _mediaRecorder = html.MediaRecorder(_canvasStream!, {
         'mimeType': 'video/webm;codecs=vp9',
       });
 
@@ -126,12 +208,55 @@ class WebVideoRecorder {
     _mediaRecorder!.stop();
     _isRecording = false;
 
-    // Ferma tutti i track dello stream
-    _mediaStream?.getTracks().forEach((track) {
+    // Ferma il timer di disegno
+    _drawTimer?.cancel();
+    _drawTimer = null;
+
+    // Ferma tutti i track degli stream
+    _cameraStream?.getTracks().forEach((track) {
+      track.stop();
+    });
+    _canvasStream?.getTracks().forEach((track) {
       track.stop();
     });
 
     return completer.future;
+  }
+  
+  /// Disegna overlay sul canvas
+  void _drawOverlay(html.CanvasRenderingContext2D ctx, int width, int height) {
+    // Debug ogni secondo
+    _frameCount++;
+    if (_frameCount % 30 == 0) {
+      print('🎨 Drawing overlay: $team1Name $team1Score - $team2Score $team2Name | $matchTime');
+    }
+    
+    // Salva stato
+    ctx.save();
+    
+    // Font e stile
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+    ctx.font = 'bold 32px Arial';
+    ctx.textBaseline = 'top';
+    
+    // Box in alto a sinistra - Tempo partita
+    final timeText = matchTime;
+    final timeWidth = ctx.measureText(timeText).width! + 40;
+    ctx.fillRect(20, 20, timeWidth, 60);
+    ctx.fillStyle = 'white';
+    ctx.fillText(timeText, 40, 35);
+    
+    // Box punteggio - Centro alto
+    final scoreText = '$team1Name $team1Score - $team2Score $team2Name';
+    final scoreWidth = ctx.measureText(scoreText).width! + 60;
+    final scoreX = (width - scoreWidth) / 2;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+    ctx.fillRect(scoreX, 20, scoreWidth, 60);
+    ctx.fillStyle = 'white';
+    ctx.fillText(scoreText, scoreX + 30, 35);
+    
+    // Ripristina stato
+    ctx.restore();
   }
 
   /// Verifica se è in registrazione
@@ -142,7 +267,11 @@ class WebVideoRecorder {
     if (_isRecording) {
       _mediaRecorder?.stop();
     }
-    _mediaStream?.getTracks().forEach((track) {
+    _drawTimer?.cancel();
+    _cameraStream?.getTracks().forEach((track) {
+      track.stop();
+    });
+    _canvasStream?.getTracks().forEach((track) {
       track.stop();
     });
     _recordedChunks.clear();

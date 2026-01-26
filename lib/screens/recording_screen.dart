@@ -19,6 +19,10 @@ class _RecordingScreenState extends State<RecordingScreen> {
     super.initState();
     // Inizializza il camera controller
     _cameraRecordingController = Get.put(CameraRecordingController());
+    
+    // Collega il camera controller al match controller
+    final matchController = Get.find<MatchController>();
+    matchController.setCameraController(_cameraRecordingController);
   }
 
   @override
