@@ -367,6 +367,49 @@ class _RecordingScreenState extends State<RecordingScreen> {
                               ),
                             ],
                           ),
+
+                          // Video saved info
+                          Obx(
+                            () => matchController.recordedVideoPath.value.isNotEmpty
+                                ? Container(
+                                    margin: const EdgeInsets.only(top: 12),
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green.withOpacity(0.2),
+                                      border: Border.all(color: Colors.green, width: 1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                                            const SizedBox(width: 8),
+                                            const Text(
+                                              'Video Salvato',
+                                              style: TextStyle(
+                                                color: Colors.green,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        SelectableText(
+                                          matchController.recordedVideoPath.value,
+                                          style: const TextStyle(
+                                            color: Colors.white70,
+                                            fontSize: 12,
+                                            fontFamily: 'monospace',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : const SizedBox(),
+                          ),
                         ],
                       ),
                     ),

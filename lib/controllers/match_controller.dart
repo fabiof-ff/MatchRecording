@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/highlight.dart';
+import 'camera_controller.dart';
 
 class MatchController extends GetxController {
   // Match data
@@ -12,24 +13,40 @@ class MatchController extends GetxController {
   final team1Name = 'Squadra 1'.obs;
   final team2Name = 'Squadra 2'.obs;
   final highlights = RxList<Highlight>([]);
+  final recordedVideoPath = ''.obs;
 
   Timer? _timer;
+  late CameraRecordingController _cameraController;
 
   @override
   void onInit() {
     super.onInit();
+    // Ottieni il camera controller se disponibile
+    try {
+      _cameraController = Get.find<CameraRecordingController>();
+    } catch (e) {
+      print('⚠️ CameraRecordingController non disponibile');
+    }
   }
 
   void startRecording() {
     isRecording.value = true;
     matchTime.value = Duration.zero;
     _startTimer();
+    
+    // Avvia registrazione video della camera
+    _startVideoRecording();
+    
     print('📹 Registrazione iniziata');
   }
 
-  void stopRecording() {
+  void stopRecording() async {
     isRecording.value = false;
     _timer?.cancel();
+    
+    // Ferma registrazione video della camera
+    await _stopVideoRecording();
+    
     print('⏹️ Registrazione fermata');
   }
 
@@ -37,6 +54,26 @@ class MatchController extends GetxController {
     _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       matchTime.value = Duration(milliseconds: matchTime.value.inMilliseconds + 100);
     });
+  }
+
+  Future<void> _startVideoRecording() async {
+    try {
+      await _cameraController.startVideoRecording();
+    } catch (e) {
+      print('⚠️ Errore avvio registrazione video: $e');
+    }
+  }
+
+  Future<void> _stopVideoRecording() async {
+    try {
+      final videoPath = await _cameraController.stopVideoRecording();
+      if (videoPath != null) {
+        recordedVideoPath.value = videoPath;
+        print('✅ Video salvato: $videoPath');
+      }
+    } catch (e) {
+      print('⚠️ Errore arresto registrazione video: $e');
+    }
   }
 
   void addGoalTeam1() {

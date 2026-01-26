@@ -1,0 +1,14 @@
+APP Match Recording - Rregistrazione partita di calcio
+
+Cosa deve fare: 
+- Registrare tramite la camera integrata nel dispositivo
+- salvare la registrazione in formato MP4
+- permettere di avere in sovraimpressione il  nome delle squadre ed la frazione di gioco (es. Primo tempo / Secondo tempo) ed il minutaggio (queste caratteristiche in sovraimpressione devono essre anche salvate nel file MP4)
+- salvare highlights durante la registrazione 
+
+Come deve essere:
+- Deve essere una web app in modo che sia portabile su diversi dispositivi (sia PC wwindows che Android e Iphone)
+- La schermata di registrazione deve essere all'interno di una finestra (interfaccia grafica) in cui ci sono i vari pulsanti
+- Il video deve essere sempre visibile (in real-time) nella finestra del dispositivo 
+- Deve essereci una schermata iniziale in cui definisco il nome delle squadre, il minuto di partenza e la frazione (che devono essere modificabili anche dalla scheramta di interfaccia durante la registrazione)
+- ci deve essere un pulsante nell'interfaccia di registrazione che  permette di salvare i timestamp degli highlights
