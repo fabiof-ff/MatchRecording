@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../controllers/match_controller.dart';
 import '../controllers/camera_controller.dart';
+import '../widgets/web_camera_preview.dart' if (dart.library.io) '../widgets/web_camera_preview_stub.dart';
 
 class RecordingScreen extends StatefulWidget {
   @override
@@ -63,8 +65,11 @@ class _RecordingScreenState extends State<RecordingScreen> {
                 if (snapshot.connectionState == ConnectionState.done) {
                   return Stack(
                     children: [
-                      // Camera preview
-                      CameraPreview(_cameraRecordingController.cameraController),
+                      // Camera preview - diverso per web e mobile
+                      if (kIsWeb)
+                        const WebCameraPreview()
+                      else
+                        CameraPreview(_cameraRecordingController.cameraController),
 
                   // Top recording indicator
                   Positioned(

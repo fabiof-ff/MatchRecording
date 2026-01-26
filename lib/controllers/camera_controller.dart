@@ -1,7 +1,13 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:async';
+import 'dart:io';
+
+// Import condizionale per web
+import 'web_video_recorder.dart' if (dart.library.io) 'web_video_recorder_stub.dart';
 
 /// Controller per gestire la camera e la registrazione video
 class CameraRecordingController extends GetxController {
@@ -13,11 +19,39 @@ class CameraRecordingController extends GetxController {
   final isInitialized = false.obs;
   final isWebPlatform = false.obs;
   final useWebSimulation = false.obs;
+  final videosSaveDirectory = ''.obs;
+  
+  // Web video recorder
+  WebVideoRecorder? _webRecorder;
   
   @override
   void onInit() {
     super.onInit();
     initializeCamera();
+    _initVideoDirectory();
+  }
+  
+  /// Inizializza e salva il percorso della directory video
+  Future<void> _initVideoDirectory() async {
+    if (kIsWeb) {
+      videosSaveDirectory.value = 'Web: download automatico nella cartella Download del browser';
+      _webRecorder = WebVideoRecorder();
+      return;
+    }
+    
+    try {
+      final Directory appDir = await getApplicationDocumentsDirectory();
+      videosSaveDirectory.value = '${appDir.path}/MatchRecordings';
+      print('📁 Directory video: ${videosSaveDirectory.value}');
+    } catch (e) {
+      print('⚠️ Errore nel recupero directory: $e');
+      videosSaveDirectory.value = 'Non disponibile';
+    }
+  }
+  
+  /// Ottiene il percorso della directory dove vengono salvati i video
+  String getVideoSaveDirectory() {
+    return videosSaveDirectory.value;
   }
 
   /// Inizializza la camera disponibile
@@ -65,20 +99,20 @@ class CameraRecordingController extends GetxController {
   /// Avvia la registrazione video
   Future<void> startVideoRecording() async {
     try {
-      if (useWebSimulation.value) {
-        // Modalità web simulation
-        print('🎥 Registrazione video (WEB SIMULATION) avviata');
-        isRecordingVideo.value = true;
-        
-        // Crea un timestamp per il nome del file
-        final timestamp = DateTime.now().millisecondsSinceEpoch;
-        videoPath.value = 'match_${timestamp}_web.mp4';
-        
-        Get.snackbar(
-          'Registrazione',
-          'Video registrazione avviata (modalità web)',
-          backgroundColor: Colors.green,
-        );
+      if (kIsWeb) {
+        // Modalità web con registrazione reale
+        if (_webRecorder != null) {
+          await _webRecorder!.startRecording();
+          isRecordingVideo.value = true;
+          
+          final timestamp = DateTime.now();
+          final fileName = 'match_${timestamp.year}${timestamp.month.toString().padLeft(2, '0')}${timestamp.day.toString().padLeft(2, '0')}_${timestamp.hour.toString().padLeft(2, '0')}${timestamp.minute.toString().padLeft(2, '0')}.webm';
+          videoPath.value = 'Web: $fileName';
+          
+          print('🎥 Registrazione video web avviata: $fileName');
+        } else {
+          throw Exception('Web recorder non inizializzato');
+        }
         return;
       }
 
@@ -100,18 +134,34 @@ class CameraRecordingController extends GetxController {
         return;
       }
 
-      // Avvia registrazione normale
+      // Ottieni la directory per salvare il video
+      final Directory appDir = await getApplicationDocumentsDirectory();
+      final String videosDir = '${appDir.path}/MatchRecordings';
+      
+      // Crea la directory se non esiste
+      final Directory dir = Directory(videosDir);
+      if (!await dir.exists()) {
+        await dir.create(recursive: true);
+        print('📁 Creata directory: $videosDir');
+      }
+      
+      // Crea il nome del file con timestamp
+      final timestamp = DateTime.now();
+      final fileName = 'match_${timestamp.year}${timestamp.month.toString().padLeft(2, '0')}${timestamp.day.toString().padLeft(2, '0')}_${timestamp.hour.toString().padLeft(2, '0')}${timestamp.minute.toString().padLeft(2, '0')}${timestamp.second.toString().padLeft(2, '0')}.mp4';
+      final filePath = '$videosDir/$fileName';
+      
+      // Avvia registrazione
       await cameraController.startVideoRecording();
       isRecordingVideo.value = true;
+      videoPath.value = filePath;
 
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      videoPath.value = 'match_${timestamp}.mp4';
-
-      print('🎥 Registrazione video avviata: ${videoPath.value}');
+      print('🎥 Registrazione video avviata');
+      print('📁 Salverà in: $filePath');
       Get.snackbar(
-        'Registrazione',
-        'Video registrazione avviata',
+        'Registrazione Avviata',
+        'Il video sarà salvato in:\n$videosDir',
         backgroundColor: Colors.green,
+        duration: const Duration(seconds: 3),
       );
     } catch (e) {
       print('❌ Errore nell\'avvio della registrazione: $e');
@@ -135,26 +185,47 @@ class CameraRecordingController extends GetxController {
         return null;
       }
 
-      if (useWebSimulation.value) {
-        // Modalità web simulation
-        isRecordingVideo.value = false;
-        print('✅ Video salvato (WEB SIMULATION): ${videoPath.value}');
-        Get.snackbar(
-          'Successo',
-          'Video registrazione completata',
-          backgroundColor: Colors.green,
-        );
-        return videoPath.value;
+      if (kIsWeb) {
+        // Modalità web con salvataggio reale
+        if (_webRecorder != null && _webRecorder!.isRecording) {
+          final fileName = await _webRecorder!.stopRecording();
+          isRecordingVideo.value = false;
+          videoPath.value = 'Web: $fileName (salvato in Download)';
+          print('✅ Video web salvato: $fileName');
+          return videoPath.value;
+        } else {
+          isRecordingVideo.value = false;
+          return null;
+        }
       }
 
-      final video = await cameraController.stopVideoRecording();
+      // Ferma la registrazione e ottieni il file temporaneo
+      final XFile video = await cameraController.stopVideoRecording();
       isRecordingVideo.value = false;
+      
+      // Sposta il file dalla posizione temporanea alla destinazione finale
+      final File videoFile = File(video.path);
+      final File savedFile = await videoFile.copy(videoPath.value);
+      
+      // Elimina il file temporaneo
+      try {
+        await videoFile.delete();
+      } catch (e) {
+        print('⚠️ Non è stato possibile eliminare il file temporaneo: $e');
+      }
 
-      print('✅ Video salvato: ${videoPath.value}');
+      final fileSize = await savedFile.length();
+      final fileSizeMB = (fileSize / (1024 * 1024)).toStringAsFixed(2);
+      
+      print('✅ Video salvato con successo!');
+      print('📁 Percorso: ${videoPath.value}');
+      print('📊 Dimensione: $fileSizeMB MB');
+      
       Get.snackbar(
-        'Successo',
-        'Video registrazione completata',
+        'Video Salvato!',
+        'Percorso: ${videoPath.value}\nDimensione: $fileSizeMB MB',
         backgroundColor: Colors.green,
+        duration: const Duration(seconds: 4),
       );
 
       return videoPath.value;
@@ -176,11 +247,16 @@ class CameraRecordingController extends GetxController {
       stopVideoRecording();
     }
     
+    // Dispose del web recorder
+    _webRecorder?.dispose();
+    
     // Dispose della camera
-    try {
-      cameraController.dispose();
-    } catch (e) {
-      print('⚠️ Errore nel dispose della camera: $e');
+    if (!kIsWeb) {
+      try {
+        cameraController.dispose();
+      } catch (e) {
+        print('⚠️ Errore nel dispose della camera: $e');
+      }
     }
     super.onClose();
   }

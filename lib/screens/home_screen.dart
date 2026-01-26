@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/match_controller.dart';
+import '../controllers/camera_controller.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -202,6 +203,42 @@ class HomeScreen extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
+                    ),
+                  ),
+                  
+                  // Info percorso salvataggio video
+                  TextButton.icon(
+                    onPressed: () {
+                      try {
+                        final cameraController = Get.find<CameraRecordingController>();
+                        final dir = cameraController.getVideoSaveDirectory();
+                        Get.dialog(
+                          AlertDialog(
+                            title: const Text('📁 Percorso Salvataggio'),
+                            content: SelectableText(
+                              dir,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Get.back(),
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          ),
+                        );
+                      } catch (e) {
+                        Get.snackbar(
+                          'Info',
+                          'Camera non ancora inizializzata',
+                          backgroundColor: Colors.orange,
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.folder_outlined, size: 18),
+                    label: const Text('Dove vengono salvati i video?'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.grey.shade700,
                     ),
                   ),
                 ],
