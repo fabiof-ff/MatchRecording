@@ -5,7 +5,9 @@ import 'dart:ui_web' as ui_web;
 
 /// Widget per mostrare il video preview della camera web
 class WebCameraPreview extends StatefulWidget {
-  const WebCameraPreview({Key? key}) : super(key: key);
+  final Function(Function() switchCamera)? onCameraReady;
+  
+  const WebCameraPreview({Key? key, this.onCameraReady}) : super(key: key);
 
   @override
   State<WebCameraPreview> createState() => _WebCameraPreviewState();
@@ -15,6 +17,7 @@ class _WebCameraPreviewState extends State<WebCameraPreview> {
   final String _viewType = 'web-camera-preview-${DateTime.now().millisecondsSinceEpoch}';
   html.VideoElement? _videoElement;
   bool _initialized = false;
+  bool _useFrontCamera = false; // false = posteriore, true = frontale
 
   @override
   void initState() {
@@ -105,10 +108,45 @@ class _WebCameraPreviewState extends State<WebCameraPreview> {
           setState(() {
             _initialized = true;
           });
+          
+          // Notifica il callback che la camera è pronta con la funzione di switch
+          widget.onCameraReady?.call(_switchCamera);
         }
       }
     } catch (e) {
       print('❌ Errore inizializzazione camera web: $e');
+    }
+  }
+  
+  /// Cambia tra camera frontale e posteriore
+  Future<void> _switchCamera() async {
+    try {
+      // Ferma lo stream corrente
+      final currentStream = _videoElement?.srcObject as html.MediaStream?;
+      currentStream?.getTracks().forEach((track) {
+        track.stop();
+      });
+      
+      // Inverte la camera
+      _useFrontCamera = !_useFrontCamera;
+      
+      // Richiedi nuovo stream con la camera desiderata
+      final facingMode = _useFrontCamera ? 'user' : 'environment';
+      final stream = await html.window.navigator.mediaDevices?.getUserMedia({
+        'video': {
+          'facingMode': {'ideal': facingMode},
+          'width': {'ideal': 1920},
+          'height': {'ideal': 1080},
+        },
+        'audio': true,
+      });
+      
+      if (stream != null) {
+        _videoElement!.srcObject = stream;
+        print('✅ Camera cambiata a: ${_useFrontCamera ? "frontale" : "posteriore"}');
+      }
+    } catch (e) {
+      print('❌ Errore cambio camera: $e');
     }
   }
 

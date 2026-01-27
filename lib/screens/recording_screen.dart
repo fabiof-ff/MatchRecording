@@ -13,6 +13,7 @@ class RecordingScreen extends StatefulWidget {
 
 class _RecordingScreenState extends State<RecordingScreen> {
   late CameraRecordingController _cameraRecordingController;
+  Function()? _switchCameraCallback;
 
   @override
   void initState() {
@@ -71,7 +72,11 @@ class _RecordingScreenState extends State<RecordingScreen> {
                     children: [
                       // Camera preview - diverso per web e mobile
                       if (kIsWeb)
-                        const WebCameraPreview()
+                        WebCameraPreview(
+                          onCameraReady: (switchCamera) {
+                            _switchCameraCallback = switchCamera;
+                          },
+                        )
                       else
                         CameraPreview(_cameraRecordingController.cameraController),
 
@@ -374,6 +379,18 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                   ),
                                 ),
                               ),
+                              
+                              // Switch camera button (solo web)
+                              if (kIsWeb)
+                                IconButton(
+                                  onPressed: _switchCameraCallback,
+                                  icon: const Icon(Icons.flip_camera_ios),
+                                  color: Colors.white,
+                                  style: IconButton.styleFrom(
+                                    backgroundColor: Colors.black.withOpacity(0.6),
+                                  ),
+                                  tooltip: 'Cambia camera',
+                                ),
                             ],
                           ),
 
