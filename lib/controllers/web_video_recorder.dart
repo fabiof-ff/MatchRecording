@@ -15,6 +15,8 @@ class WebVideoRecorder {
   html.VideoElement? _videoElement;
   Timer? _drawTimer;
   int _frameCount = 0;
+  String _mimeType = 'video/webm;codecs=vp9';
+  String _fileExtension = 'webm';
   
   // Dati overlay
   String team1Name = 'Squadra 1';
@@ -166,9 +168,27 @@ class WebVideoRecorder {
         _drawOverlay(ctx, videoWidth, videoHeight);
       });
 
+      // Determina il mimeType supportato dal browser
+      final supportedTypes = [
+        'video/mp4',
+        'video/mp4;codecs=avc1',
+        'video/webm;codecs=h264',
+        'video/webm;codecs=vp9',
+        'video/webm',
+      ];
+      
+      for (var type in supportedTypes) {
+        if (html.MediaRecorder.isTypeSupported(type)) {
+          _mimeType = type;
+          _fileExtension = type.startsWith('video/mp4') ? 'mp4' : 'webm';
+          print('🎬 Formato video supportato: $_mimeType');
+          break;
+        }
+      }
+
       // Crea MediaRecorder dal canvas stream
       _mediaRecorder = html.MediaRecorder(_canvasStream!, {
-        'mimeType': 'video/webm;codecs=vp9',
+        'mimeType': _mimeType,
       });
 
       _recordedChunks.clear();
@@ -215,12 +235,12 @@ class WebVideoRecorder {
     // Ascolta l'evento di stop
     _mediaRecorder!.addEventListener('stop', (event) {
       try {
-        // Crea un blob dal video registrato
-        final blob = html.Blob(_recordedChunks, 'video/webm');
+        // Crea un blob dal video registrato con il tipo corretto
+        final blob = html.Blob(_recordedChunks, _mimeType);
         
-        // Crea nome file con timestamp
+        // Crea nome file con timestamp ed estensione corretta
         final timestamp = DateTime.now();
-        final fileName = 'match_${timestamp.year}${timestamp.month.toString().padLeft(2, '0')}${timestamp.day.toString().padLeft(2, '0')}_${timestamp.hour.toString().padLeft(2, '0')}${timestamp.minute.toString().padLeft(2, '0')}.webm';
+        final fileName = 'match_${timestamp.year}${timestamp.month.toString().padLeft(2, '0')}${timestamp.day.toString().padLeft(2, '0')}_${timestamp.hour.toString().padLeft(2, '0')}${timestamp.minute.toString().padLeft(2, '0')}.$_fileExtension';
 
         // Crea URL per il blob
         final url = html.Url.createObjectUrlFromBlob(blob);
