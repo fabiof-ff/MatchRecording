@@ -24,6 +24,7 @@ class WebVideoRecorder {
   int team1Score = 0;
   int team2Score = 0;
   String matchTime = '00:00';
+  bool isLandscape = false; // Orientamento del dispositivo
   
   /// Aggiorna lo stream della camera (per switch camera durante registrazione)
   void updateCameraStream(html.MediaStream newStream) {
@@ -46,15 +47,17 @@ class WebVideoRecorder {
     int? team1Score,
     int? team2Score,
     String? matchTime,
+    bool? isLandscape,
   }) {
     if (team1Name != null) this.team1Name = team1Name;
     if (team2Name != null) this.team2Name = team2Name;
     if (team1Score != null) this.team1Score = team1Score;
     if (team2Score != null) this.team2Score = team2Score;
     if (matchTime != null) this.matchTime = matchTime;
+    if (isLandscape != null) this.isLandscape = isLandscape;
     
     // Debug: stampa i valori aggiornati
-    print('🎯 Overlay values: $team1Name $team1Score - $team2Score $team2Name | $matchTime');
+    print('🎯 Overlay values: $team1Name $team1Score - $team2Score $team2Name | $matchTime | Landscape: ${this.isLandscape}');
   }
   
   /// Avvia la registrazione video web con overlay
@@ -329,11 +332,10 @@ class WebVideoRecorder {
     // Debug ogni secondo
     _frameCount++;
     if (_frameCount % 30 == 0) {
-      print('🎨 Drawing overlay: $team1Name $team1Score - $team2Score $team2Name | $matchTime');
+      print('🎨 Drawing overlay: $team1Name $team1Score - $team2Score $team2Name | $matchTime | Landscape: $isLandscape');
     }
     
-    // Determina se è landscape (larghezza > altezza)
-    final isLandscape = width > height;
+    // Usa la variabile isLandscape invece di calcolare dalle dimensioni
     final scaleFactor = isLandscape ? 0.7 : 1.0; // Riduci dimensioni in landscape
     
     // Salva stato

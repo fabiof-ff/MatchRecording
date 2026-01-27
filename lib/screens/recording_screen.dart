@@ -48,7 +48,13 @@ class _RecordingScreenState extends State<RecordingScreen> {
   Widget build(BuildContext context) {
     final matchController = Get.find<MatchController>();
 
-    return WillPopScope(
+    return OrientationBuilder(
+      builder: (context, orientation) {
+        // Aggiorna l'orientamento nel match controller
+        final isLandscape = orientation == Orientation.landscape;
+        matchController.setOrientation(isLandscape);
+        
+        return WillPopScope(
       onWillPop: () async {
         if (matchController.isRecording.value) {
           matchController.stopRecording();
@@ -480,6 +486,8 @@ class _RecordingScreenState extends State<RecordingScreen> {
           },
         ),
       ),
+      );
+      },
     );
   }
 }

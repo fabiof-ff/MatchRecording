@@ -68,6 +68,7 @@ class CameraRecordingController extends GetxController {
     int? team1Score,
     int? team2Score,
     String? matchTime,
+    bool? isLandscape,
   }) {
     if (kIsWeb && _webRecorder != null) {
       _webRecorder!.updateOverlay(
@@ -76,6 +77,7 @@ class CameraRecordingController extends GetxController {
         team1Score: team1Score,
         team2Score: team2Score,
         matchTime: matchTime,
+        isLandscape: isLandscape,
       );
     }
   }
