@@ -383,7 +383,14 @@ class _RecordingScreenState extends State<RecordingScreen> {
                               // Switch camera button (solo web)
                               if (kIsWeb)
                                 IconButton(
-                                  onPressed: _switchCameraCallback,
+                                  onPressed: () {
+                                    print('🎥 Pulsante camera premuto. Callback: ${_switchCameraCallback != null ? "presente" : "null"}');
+                                    if (_switchCameraCallback != null) {
+                                      _switchCameraCallback!();
+                                    } else {
+                                      print('❌ Callback null!');
+                                    }
+                                  },
                                   icon: const Icon(Icons.flip_camera_ios),
                                   color: Colors.white,
                                   style: IconButton.styleFrom(

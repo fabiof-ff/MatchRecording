@@ -110,6 +110,7 @@ class _WebCameraPreviewState extends State<WebCameraPreview> {
           });
           
           // Notifica il callback che la camera è pronta con la funzione di switch
+          print('✅ Camera pronta, callback registrato');
           widget.onCameraReady?.call(_switchCamera);
         }
       }
@@ -120,6 +121,7 @@ class _WebCameraPreviewState extends State<WebCameraPreview> {
   
   /// Cambia tra camera frontale e posteriore
   Future<void> _switchCamera() async {
+    print('🔄 Switch camera chiamato! Stato attuale: ${_useFrontCamera ? "frontale" : "posteriore"}');
     try {
       // Ferma lo stream corrente
       final currentStream = _videoElement?.srcObject as html.MediaStream?;
