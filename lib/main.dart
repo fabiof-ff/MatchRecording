@@ -16,10 +16,11 @@ import 'screens/recording_screen.dart';
 import 'screens/highlights_screen.dart';
 
 void main() {
-  // Blocca l'orientamento in portrait mode
+  // Blocca l'orientamento in landscape mode
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
   ]).then((_) {
     runApp(const MatchRecordingApp());
   });
