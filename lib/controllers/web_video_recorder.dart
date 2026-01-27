@@ -345,66 +345,128 @@ class WebVideoRecorder {
     final bgColor = 'rgba(0, 0, 0, 0.6)';
     final textColor = 'white';
     
-    // === BOX TEMPO (in alto a sinistra) ===
-    ctx.fillStyle = bgColor;
-    final timeBoxX = margin;
-    final timeBoxY = margin;
-    final timeBoxWidth = 140.0;
-    final timeBoxHeight = 38.0;
-    
-    // Disegna rettangolo con bordi arrotondati per tempo
-    _drawRoundedRect(ctx, timeBoxX, timeBoxY, timeBoxWidth, timeBoxHeight, borderRadius);
-    ctx.fill();
-    
-    // Icona orologio (simbolo)
-    ctx.fillStyle = textColor;
-    ctx.font = '16px Arial';
-    ctx.fillText('🕐', timeBoxX + 12, timeBoxY + 11);
-    
-    // Testo tempo
-    ctx.font = 'bold 14px monospace';
-    ctx.textBaseline = 'middle';
-    final timeTextX = timeBoxX + 40;
-    final timeTextY = timeBoxY + timeBoxHeight / 2;
-    ctx.fillText(matchTime, timeTextX, timeTextY);
-    
-    // === BOX PUNTEGGIO ===
-    final scoreBoxX = timeBoxX;
-    final scoreBoxY = timeBoxY + timeBoxHeight + 8;
-    final scoreBoxWidth = 200.0;
-    final scoreBoxHeight = 80.0;
-    
-    ctx.fillStyle = bgColor;
-    _drawRoundedRect(ctx, scoreBoxX, scoreBoxY, scoreBoxWidth, scoreBoxHeight, 8.0);
-    ctx.fill();
-    
-    // Testo squadre e punteggi
-    ctx.fillStyle = textColor;
-    
-    // Team 1
-    ctx.font = '10px Arial';
-    ctx.textAlign = 'center';
-    final team1X = scoreBoxX + scoreBoxWidth / 4;
-    ctx.fillText(team1Name, team1X, scoreBoxY + 20);
-    
-    ctx.font = 'bold 18px Arial';
-    ctx.fillText('$team1Score', team1X, scoreBoxY + 45);
-    
-    // Linea separatore verticale
-    ctx.strokeStyle = textColor;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(scoreBoxX + scoreBoxWidth / 2, scoreBoxY + 15);
-    ctx.lineTo(scoreBoxX + scoreBoxWidth / 2, scoreBoxY + scoreBoxHeight - 15);
-    ctx.stroke();
-    
-    // Team 2
-    ctx.font = '10px Arial';
-    final team2X = scoreBoxX + 3 * scoreBoxWidth / 4;
-    ctx.fillText(team2Name, team2X, scoreBoxY + 20);
-    
-    ctx.font = 'bold 18px Arial';
-    ctx.fillText('$team2Score', team2X, scoreBoxY + 45);
+    if (isLandscape) {
+      // === LAYOUT ORIZZONTALE (tempo e punteggio affiancati) ===
+      
+      // BOX TEMPO
+      final timeBoxX = margin;
+      final timeBoxY = margin;
+      final timeBoxWidth = 140.0;
+      final timeBoxHeight = 38.0;
+      
+      ctx.fillStyle = bgColor;
+      _drawRoundedRect(ctx, timeBoxX, timeBoxY, timeBoxWidth, timeBoxHeight, borderRadius);
+      ctx.fill();
+      
+      // Icona orologio
+      ctx.fillStyle = textColor;
+      ctx.font = '16px Arial';
+      ctx.fillText('🕐', timeBoxX + 12, timeBoxY + 11);
+      
+      // Testo tempo
+      ctx.font = 'bold 14px monospace';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(matchTime, timeBoxX + 40, timeBoxY + timeBoxHeight / 2);
+      
+      // BOX PUNTEGGIO (a destra del tempo)
+      final scoreBoxX = timeBoxX + timeBoxWidth + 8;
+      final scoreBoxY = margin;
+      final scoreBoxWidth = 200.0;
+      final scoreBoxHeight = 38.0;
+      
+      ctx.fillStyle = bgColor;
+      _drawRoundedRect(ctx, scoreBoxX, scoreBoxY, scoreBoxWidth, scoreBoxHeight, 8.0);
+      ctx.fill();
+      
+      // Testo squadre e punteggi (layout orizzontale compatto)
+      ctx.fillStyle = textColor;
+      
+      // Team 1
+      ctx.font = '10px Arial';
+      ctx.textAlign = 'center';
+      final team1X = scoreBoxX + scoreBoxWidth / 4;
+      ctx.fillText(team1Name, team1X, scoreBoxY + 12);
+      
+      ctx.font = 'bold 18px Arial';
+      ctx.fillText('$team1Score', team1X, scoreBoxY + 28);
+      
+      // Linea separatore verticale
+      ctx.strokeStyle = textColor;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(scoreBoxX + scoreBoxWidth / 2, scoreBoxY + 8);
+      ctx.lineTo(scoreBoxX + scoreBoxWidth / 2, scoreBoxY + scoreBoxHeight - 8);
+      ctx.stroke();
+      
+      // Team 2
+      ctx.font = '10px Arial';
+      final team2X = scoreBoxX + 3 * scoreBoxWidth / 4;
+      ctx.fillText(team2Name, team2X, scoreBoxY + 12);
+      
+      ctx.font = 'bold 18px Arial';
+      ctx.fillText('$team2Score', team2X, scoreBoxY + 28);
+      
+    } else {
+      // === LAYOUT VERTICALE (tempo sopra punteggio) ===
+      
+      // BOX TEMPO (in alto a sinistra)
+      final timeBoxX = margin;
+      final timeBoxY = margin;
+      final timeBoxWidth = 140.0;
+      final timeBoxHeight = 38.0;
+      
+      ctx.fillStyle = bgColor;
+      _drawRoundedRect(ctx, timeBoxX, timeBoxY, timeBoxWidth, timeBoxHeight, borderRadius);
+      ctx.fill();
+      
+      // Icona orologio
+      ctx.fillStyle = textColor;
+      ctx.font = '16px Arial';
+      ctx.fillText('🕐', timeBoxX + 12, timeBoxY + 11);
+      
+      // Testo tempo
+      ctx.font = 'bold 14px monospace';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(matchTime, timeBoxX + 40, timeBoxY + timeBoxHeight / 2);
+      
+      // BOX PUNTEGGIO (sotto il tempo)
+      final scoreBoxX = timeBoxX;
+      final scoreBoxY = timeBoxY + timeBoxHeight + 8;
+      final scoreBoxWidth = 200.0;
+      final scoreBoxHeight = 80.0;
+      
+      ctx.fillStyle = bgColor;
+      _drawRoundedRect(ctx, scoreBoxX, scoreBoxY, scoreBoxWidth, scoreBoxHeight, 8.0);
+      ctx.fill();
+      
+      // Testo squadre e punteggi
+      ctx.fillStyle = textColor;
+      
+      // Team 1
+      ctx.font = '10px Arial';
+      ctx.textAlign = 'center';
+      final team1X = scoreBoxX + scoreBoxWidth / 4;
+      ctx.fillText(team1Name, team1X, scoreBoxY + 20);
+      
+      ctx.font = 'bold 18px Arial';
+      ctx.fillText('$team1Score', team1X, scoreBoxY + 45);
+      
+      // Linea separatore verticale
+      ctx.strokeStyle = textColor;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(scoreBoxX + scoreBoxWidth / 2, scoreBoxY + 15);
+      ctx.lineTo(scoreBoxX + scoreBoxWidth / 2, scoreBoxY + scoreBoxHeight - 15);
+      ctx.stroke();
+      
+      // Team 2
+      ctx.font = '10px Arial';
+      final team2X = scoreBoxX + 3 * scoreBoxWidth / 4;
+      ctx.fillText(team2Name, team2X, scoreBoxY + 20);
+      
+      ctx.font = 'bold 18px Arial';
+      ctx.fillText('$team2Score', team2X, scoreBoxY + 45);
+    }
     
     ctx.restore();
   }
