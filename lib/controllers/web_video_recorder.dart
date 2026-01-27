@@ -354,62 +354,64 @@ class WebVideoRecorder {
       // === LAYOUT LANDSCAPE COMPATTO (senza rotazione) ===
       // Nessuna rotazione del canvas
       
-      // Overlay compatto in alto a sinistra (dopo rotazione)
+      // Overlay compatto in alto a sinistra
       final margin = 12.0;
       final boxX = margin;
       final boxY = margin;
-      final boxWidth = 240.0; // Aumentato per contenere più info
-      final boxHeight = 50.0; // Aumentato per 2 righe
+      final boxWidth = 280.0; // Allargato per contenere più info
+      final boxHeight = 65.0; // Aumentato per più righe
       final borderRadius = 8.0;
       
       ctx.fillStyle = bgColor;
       _drawRoundedRect(ctx, boxX, boxY, boxWidth, boxHeight, borderRadius);
       ctx.fill();
       
-      // Icona tempo + tempo + indicatore tempo
+      // Colonna sinistra: Tempo e indicatore frazione
       ctx.fillStyle = textColor;
-      ctx.font = '16px Arial'; // Font ingrandito
-      ctx.fillText('🕐', boxX + 12, boxY + 14);
+      ctx.font = '18px Arial'; // Font ingrandito
+      ctx.fillText('🕐', boxX + 12, boxY + 16);
       
-      ctx.font = 'bold 14px monospace'; // Font ingrandito
+      ctx.font = 'bold 16px monospace'; // Font ingrandito
       ctx.textBaseline = 'middle';
-      ctx.fillText(matchTime, boxX + 40, boxY + 16);
+      ctx.fillText(matchTime, boxX + 40, boxY + 18);
       
-      // Indicatore tempo (1° T / 2° T)
-      ctx.font = 'bold 12px Arial';
+      // Indicatore tempo (1° T / 2° T) sotto il cronometro
+      ctx.font = 'bold 14px Arial'; // Font ingrandito
       ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-      ctx.fillText(halfTime, boxX + 115, boxY + 16);
+      ctx.fillText(halfTime, boxX + 40, boxY + 38);
       
       // Separatore verticale
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(boxX + 150, boxY + 10);
-      ctx.lineTo(boxX + 150, boxY + boxHeight - 10);
+      ctx.moveTo(boxX + 130, boxY + 10);
+      ctx.lineTo(boxX + 130, boxY + boxHeight - 10);
       ctx.stroke();
       
-      // Nomi squadre (riga superiore) con colori
-      ctx.font = 'bold 11px Arial'; // Font ingrandito e bold
+      // Colonna destra: Nomi squadre e punteggio
       ctx.textAlign = 'left';
+      
+      // Nomi squadre (riga superiore) con colori
+      ctx.font = 'bold 13px Arial'; // Font ingrandito
       
       // Team 1
       ctx.fillStyle = team1Color;
-      ctx.fillText(team1Name, boxX + 160, boxY + 18);
+      ctx.fillText(team1Name, boxX + 145, boxY + 20);
       
       // Separatore
       final team1Width = ctx.measureText(team1Name).width!.toDouble();
       ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-      ctx.fillText(' - ', boxX + 160 + team1Width, boxY + 18);
+      ctx.fillText(' - ', boxX + 145 + team1Width, boxY + 20);
       
       // Team 2
       final separatorWidth = ctx.measureText(' - ').width!.toDouble();
       ctx.fillStyle = team2Color;
-      ctx.fillText(team2Name, boxX + 160 + team1Width + separatorWidth, boxY + 18);
+      ctx.fillText(team2Name, boxX + 145 + team1Width + separatorWidth, boxY + 20);
       
       // Punteggio (riga inferiore, più grande)
       ctx.fillStyle = textColor;
-      ctx.font = 'bold 18px Arial'; // Font ingrandito
-      ctx.fillText('$team1Score-$team2Score', boxX + 195, boxY + 38);
+      ctx.font = 'bold 22px Arial'; // Font ancora più grande
+      ctx.fillText('$team1Score-$team2Score', boxX + 180, boxY + 48);
       
     } else {
       // === LAYOUT VERTICALE ===
