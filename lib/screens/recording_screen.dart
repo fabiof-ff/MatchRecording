@@ -140,17 +140,21 @@ class _RecordingScreenState extends State<RecordingScreen> {
                       
                       if (isLandscape) {
                         // LAYOUT LANDSCAPE COMPLETO - RUOTATO DI 90 GRADI
-                        return Transform.rotate(
-                          angle: 1.5708, // 90 gradi in radianti (π/2)
-                          alignment: Alignment.topLeft,
-                          child: Transform.translate(
-                            offset: const Offset(0, -300), // Sposta per compensare la rotazione
-                            child: Stack(
-                              children: [
-                                // 1. Overlay compatto in alto a sinistra
-                                Positioned(
-                                  top: 12,
-                                  left: 12,
+                        return Positioned(
+                          left: 0,
+                          top: 0,
+                          child: Transform.rotate(
+                            angle: 1.5708, // 90 gradi in radianti (π/2)
+                            origin: const Offset(200, 0), // Punto di rotazione regolabile
+                            child: Container(
+                              width: 600, // Larghezza che diventerà l'altezza dopo la rotazione
+                              height: 400, // Altezza che diventerà la larghezza dopo la rotazione
+                              child: Stack(
+                                children: [
+                                  // 1. Overlay compatto in alto a sinistra
+                                  Positioned(
+                                    top: 12,
+                                    left: 12,
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                 decoration: BoxDecoration(
@@ -489,6 +493,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                             ),
                           ],
                         ),
+                            ),
                           ),
                         );
                       } else {
