@@ -50,16 +50,25 @@ class WebVideoRecorder {
       print('📹 Tentativo di accesso alla camera...');
       
       final constraints = [
-        // Constraint 1: Camera posteriore con resolution ideale (Android)
+        // Constraint 1: Camera posteriore con facingMode exact (iOS)
         {
           'video': {
-            'facingMode': 'environment',
+            'facingMode': {'exact': 'environment'},
             'width': {'ideal': 1920},
             'height': {'ideal': 1080},
           },
           'audio': true,
         },
-        // Constraint 2: Camera frontale con resolution ideale
+        // Constraint 2: Camera posteriore con facingMode ideal (Android)
+        {
+          'video': {
+            'facingMode': {'ideal': 'environment'},
+            'width': {'ideal': 1920},
+            'height': {'ideal': 1080},
+          },
+          'audio': true,
+        },
+        // Constraint 3: Camera frontale con resolution ideale (fallback)
         {
           'video': {
             'facingMode': 'user',
