@@ -210,9 +210,10 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                           children: [
                                             Text(
                                               matchController.team1Name.value,
-                                              style: const TextStyle(
-                                                color: Colors.white70,
+                                              style: TextStyle(
+                                                color: matchController.team1Color.value,
                                                 fontSize: 10,
+                                                fontWeight: FontWeight.bold,
                                               ),
                                             ),
                                             Text(
@@ -224,9 +225,10 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                             ),
                                             Text(
                                               matchController.team2Name.value,
-                                              style: const TextStyle(
-                                                color: Colors.white70,
+                                              style: TextStyle(
+                                                color: matchController.team2Color.value,
                                                 fontSize: 10,
+                                                fontWeight: FontWeight.bold,
                                               ),
                                             ),
                                           ],

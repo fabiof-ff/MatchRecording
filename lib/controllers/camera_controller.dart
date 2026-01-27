@@ -65,6 +65,8 @@ class CameraRecordingController extends GetxController {
   void updateOverlay({
     String? team1Name,
     String? team2Name,
+    String? team1Color,
+    String? team2Color,
     int? team1Score,
     int? team2Score,
     String? matchTime,
@@ -75,6 +77,8 @@ class CameraRecordingController extends GetxController {
       _webRecorder!.updateOverlay(
         team1Name: team1Name,
         team2Name: team2Name,
+        team1Color: team1Color,
+        team2Color: team2Color,
         team1Score: team1Score,
         team2Score: team2Score,
         matchTime: matchTime,

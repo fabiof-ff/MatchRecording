@@ -21,6 +21,8 @@ class WebVideoRecorder {
   // Dati overlay
   String team1Name = 'Squadra 1';
   String team2Name = 'Squadra 2';
+  String team1Color = '#2196F3'; // Blu
+  String team2Color = '#F44336'; // Rosso
   int team1Score = 0;
   int team2Score = 0;
   String matchTime = '00:00';
@@ -45,6 +47,8 @@ class WebVideoRecorder {
   void updateOverlay({
     String? team1Name,
     String? team2Name,
+    String? team1Color,
+    String? team2Color,
     int? team1Score,
     int? team2Score,
     String? matchTime,
@@ -53,6 +57,8 @@ class WebVideoRecorder {
   }) {
     if (team1Name != null) this.team1Name = team1Name;
     if (team2Name != null) this.team2Name = team2Name;
+    if (team1Color != null) this.team1Color = team1Color;
+    if (team2Color != null) this.team2Color = team2Color;
     if (team1Score != null) this.team1Score = team1Score;
     if (team2Score != null) this.team2Score = team2Score;
     if (matchTime != null) this.matchTime = matchTime;
@@ -384,11 +390,23 @@ class WebVideoRecorder {
       ctx.lineTo(boxX + 150, boxY + boxHeight - 10);
       ctx.stroke();
       
-      // Nomi squadre (riga superiore)
+      // Nomi squadre (riga superiore) con colori
+      ctx.font = 'bold 11px Arial'; // Font ingrandito e bold
+      ctx.textAlign = 'left';
+      
+      // Team 1
+      ctx.fillStyle = team1Color;
+      ctx.fillText(team1Name, boxX + 160, boxY + 18);
+      
+      // Separatore
+      final team1Width = ctx.measureText(team1Name).width!.toDouble();
       ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-      ctx.font = '11px Arial'; // Font ingrandito
-      ctx.textAlign = 'center';
-      ctx.fillText('$team1Name - $team2Name', boxX + 195, boxY + 18);
+      ctx.fillText(' - ', boxX + 160 + team1Width, boxY + 18);
+      
+      // Team 2
+      final separatorWidth = ctx.measureText(' - ').width!.toDouble();
+      ctx.fillStyle = team2Color;
+      ctx.fillText(team2Name, boxX + 160 + team1Width + separatorWidth, boxY + 18);
       
       // Punteggio (riga inferiore, più grande)
       ctx.fillStyle = textColor;
@@ -439,9 +457,10 @@ class WebVideoRecorder {
     ctx.fillStyle = textColor;
     
     // Team 1
-    ctx.font = '12px Arial'; // Font ingrandito
+    ctx.font = 'bold 12px Arial'; // Font ingrandito e bold
     ctx.textAlign = 'center';
     final team1X = scoreBoxX + scoreBoxWidth / 4;
+    ctx.fillStyle = team1Color;
     ctx.fillText(team1Name, team1X, scoreBoxY + 22);
       
       ctx.font = 'bold 22px Arial'; // Font ingrandito
@@ -456,8 +475,9 @@ class WebVideoRecorder {
       ctx.stroke();
       
       // Team 2
-      ctx.font = '12px Arial'; // Font ingrandito
+      ctx.font = 'bold 12px Arial'; // Font ingrandito e bold
       final team2X = scoreBoxX + 3 * scoreBoxWidth / 4;
+      ctx.fillStyle = team2Color;
       ctx.fillText(team2Name, team2X, scoreBoxY + 22);
     
       ctx.font = 'bold 22px Arial'; // Font ingrandito

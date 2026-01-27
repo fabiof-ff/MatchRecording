@@ -12,6 +12,8 @@ class MatchController extends GetxController {
   final team2Score = 0.obs;
   final team1Name = 'Squadra 1'.obs;
   final team2Name = 'Squadra 2'.obs;
+  final team1Color = Colors.blue.obs;
+  final team2Color = Colors.red.obs;
   final halfTime = '1° T'.obs; // Primo o secondo tempo
   final highlights = RxList<Highlight>([]);
   final recordedVideoPath = ''.obs;
@@ -51,6 +53,8 @@ class MatchController extends GetxController {
       _cameraController!.updateOverlay(
         team1Name: team1Name.value,
         team2Name: team2Name.value,
+        team1Color: '#${team1Color.value.value.toRadixString(16).padLeft(8, '0').substring(2)}',
+        team2Color: '#${team2Color.value.value.toRadixString(16).padLeft(8, '0').substring(2)}',
         team1Score: team1Score.value,
         team2Score: team2Score.value,
         matchTime: formatMatchTime(matchTime.value),

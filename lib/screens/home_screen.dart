@@ -56,60 +56,6 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
 
-              // Recording Status
-              Obx(
-                () => Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: matchController.isRecording.value ? Colors.red.shade50 : Colors.grey.shade100,
-                    border: Border.all(
-                      color: matchController.isRecording.value ? Colors.red : Colors.grey,
-                      width: 2,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          color: matchController.isRecording.value ? Colors.red : Colors.grey,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              matchController.isRecording.value
-                                  ? 'Registrazione in corso'
-                                  : 'Pronto per registrare',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                              ),
-                            ),
-                            if (matchController.isRecording.value)
-                              Obx(
-                                () => Text(
-                                  'Durata: ${matchController.formatMatchTime(matchController.matchTime.value)}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey.shade600,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
               // Overlay Settings
               Container(
                 padding: const EdgeInsets.all(16),
@@ -128,17 +74,71 @@ class HomeScreen extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    Obx(
-                      () => Column(
-                        children: [
-                          _buildSettingRow('Tempo partita', matchController.formatMatchTime(matchController.matchTime.value)),
-                          const SizedBox(height: 8),
-                          _buildSettingRow('${matchController.team1Name.value}', '${matchController.team1Score.value} gol'),
-                          const SizedBox(height: 8),
-                          _buildSettingRow('${matchController.team2Name.value}', '${matchController.team2Score.value} gol'),
-                        ],
-                      ),
+                    const SizedBox(height: 16),
+                    
+                    // Squadra 1
+                    const Text('Squadra 1', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Nome squadra 1',
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            ),
+                            onChanged: (value) => matchController.team1Name.value = value,
+                            controller: TextEditingController(text: matchController.team1Name.value),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Obx(() => GestureDetector(
+                          onTap: () => _showColorPicker(context, matchController, true),
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: matchController.team1Color.value,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.grey.shade300, width: 2),
+                            ),
+                          ),
+                        )),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    // Squadra 2
+                    const Text('Squadra 2', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Nome squadra 2',
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            ),
+                            onChanged: (value) => matchController.team2Name.value = value,
+                            controller: TextEditingController(text: matchController.team2Name.value),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Obx(() => GestureDetector(
+                          onTap: () => _showColorPicker(context, matchController, false),
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: matchController.team2Color.value,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.grey.shade300, width: 2),
+                            ),
+                          ),
+                        )),
+                      ],
                     ),
                   ],
                 ),
@@ -266,6 +266,60 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+  
+  void _showColorPicker(BuildContext context, MatchController controller, bool isTeam1) {
+    final colors = [
+      Colors.blue,
+      Colors.red,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.yellow,
+      Colors.pink,
+      Colors.teal,
+      Colors.indigo,
+      Colors.cyan,
+      Colors.lime,
+      Colors.amber,
+    ];
+    
+    Get.dialog(
+      AlertDialog(
+        title: Text('Scegli colore ${isTeam1 ? "Squadra 1" : "Squadra 2"}'),
+        content: Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: colors.map((color) {
+            return GestureDetector(
+              onTap: () {
+                if (isTeam1) {
+                  controller.team1Color.value = color;
+                } else {
+                  controller.team2Color.value = color;
+                }
+                Get.back();
+              },
+              child: Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300, width: 2),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Annulla'),
+          ),
+        ],
+      ),
     );
   }
 }
