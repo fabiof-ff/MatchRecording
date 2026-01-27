@@ -93,44 +93,48 @@ class _RecordingScreenState extends State<RecordingScreen> {
                       else
                         CameraPreview(_cameraRecordingController.cameraController),
 
-                  // Top recording indicator
-                  Positioned(
-                    top: 16,
-                    right: 16,
-                    child: Obx(
-                      () => matchController.isRecording.value
-                          ? Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.7),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Row(
-                                spacing: 8,
-                                children: [
-                                  Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: BoxDecoration(
-                                      color: Colors.red,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  Obx(
-                                    () => Text(
-                                      matchController.formatMatchTime(matchController.matchTime.value),
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
+                  // Top recording indicator (solo in modalità verticale)
+                  Obx(
+                    () => !matchController.isOverlayLandscape.value
+                        ? Positioned(
+                            top: 16,
+                            right: 16,
+                            child: Obx(
+                              () => matchController.isRecording.value
+                                  ? Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.7),
+                                        borderRadius: BorderRadius.circular(20),
                                       ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : const SizedBox(),
-                    ),
+                                      child: Row(
+                                        spacing: 8,
+                                        children: [
+                                          Container(
+                                            width: 8,
+                                            height: 8,
+                                            decoration: BoxDecoration(
+                                              color: Colors.red,
+                                              shape: BoxShape.circle,
+                                            ),
+                                          ),
+                                          Obx(
+                                            () => Text(
+                                              matchController.formatMatchTime(matchController.matchTime.value),
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  : const SizedBox(),
+                            ),
+                          )
+                        : const SizedBox(),
                   ),
 
                   // Live Overlay (cronometro e punteggio)
@@ -141,14 +145,14 @@ class _RecordingScreenState extends State<RecordingScreen> {
                       if (isLandscape) {
                         // LAYOUT LANDSCAPE COMPLETO - RUOTATO DI 90 GRADI
                         return Positioned(
-                          left: -50,
-                          top: 100, // Centrato verticalmente
+                          left: -80,
+                          top: 80, // Centrato verticalmente
                           child: Transform.rotate(
                             angle: 1.5708, // 90 gradi in radianti (π/2)
                             origin: const Offset(0, 0),
                             child: Container(
-                              width: 350, // Ridotto per entrare nello schermo
-                              height: 300, // Ridotto per entrare nello schermo
+                              width: 450, // Ingrandito per occupare meglio lo schermo
+                              height: 350, // Ingrandito per occupare meglio lo schermo
                               child: Stack(
                                 children: [
                                   // 1. Overlay compatto in alto a sinistra
