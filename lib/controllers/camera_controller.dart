@@ -68,6 +68,7 @@ class CameraRecordingController extends GetxController {
     int? team1Score,
     int? team2Score,
     String? matchTime,
+    String? halfTime,
     bool? isLandscape,
   }) {
     if (kIsWeb && _webRecorder != null) {
@@ -77,6 +78,7 @@ class CameraRecordingController extends GetxController {
         team1Score: team1Score,
         team2Score: team2Score,
         matchTime: matchTime,
+        halfTime: halfTime,
         isLandscape: isLandscape,
       );
     }

@@ -160,7 +160,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                     top: 12,
                                     left: 12,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                 decoration: BoxDecoration(
                                   color: Colors.black.withOpacity(0.7),
                                   borderRadius: BorderRadius.circular(8),
@@ -169,7 +169,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                   mainAxisSize: MainAxisSize.min,
                                   spacing: 8,
                                   children: [
-                                    // Tempo
+                                    // Tempo + indicatore tempo
                                     Row(
                                       spacing: 4,
                                       children: [
@@ -183,22 +183,64 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                             fontFamily: 'monospace',
                                           ),
                                         ),
+                                        Text(
+                                          ' ${matchController.halfTime.value}',
+                                          style: const TextStyle(
+                                            color: Colors.white70,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 10,
+                                          ),
+                                        ),
                                       ],
                                     ),
                                     // Separatore
                                     Container(
                                       width: 1,
-                                      height: 16,
+                                      height: 20,
                                       color: Colors.white.withOpacity(0.5),
                                     ),
-                                    // Punteggio compatto
-                                    Text(
-                                      '${matchController.team1Score.value}-${matchController.team2Score.value}',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                      ),
+                                    // Squadre e punteggio
+                                    Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        // Nomi squadre
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          spacing: 6,
+                                          children: [
+                                            Text(
+                                              matchController.team1Name.value,
+                                              style: const TextStyle(
+                                                color: Colors.white70,
+                                                fontSize: 10,
+                                              ),
+                                            ),
+                                            Text(
+                                              '-',
+                                              style: const TextStyle(
+                                                color: Colors.white70,
+                                                fontSize: 10,
+                                              ),
+                                            ),
+                                            Text(
+                                              matchController.team2Name.value,
+                                              style: const TextStyle(
+                                                color: Colors.white70,
+                                                fontSize: 10,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        // Punteggio
+                                        Text(
+                                          '${matchController.team1Score.value}-${matchController.team2Score.value}',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -371,6 +413,34 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                           ),
                                         ),
                                       ),
+                                    
+                                    // Toggle half time button
+                                    Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        onTap: () {
+                                          matchController.toggleHalfTime();
+                                        },
+                                        child: Container(
+                                          width: 50,
+                                          height: 50,
+                                          decoration: BoxDecoration(
+                                            color: Colors.black.withOpacity(0.7),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Center(
+                                            child: Obx(() => Text(
+                                              matchController.halfTime.value,
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 11,
+                                              ),
+                                            )),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),

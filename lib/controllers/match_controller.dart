@@ -12,6 +12,7 @@ class MatchController extends GetxController {
   final team2Score = 0.obs;
   final team1Name = 'Squadra 1'.obs;
   final team2Name = 'Squadra 2'.obs;
+  final halfTime = '1° T'.obs; // Primo o secondo tempo
   final highlights = RxList<Highlight>([]);
   final recordedVideoPath = ''.obs;
   final isOverlayLandscape = false.obs; // Orientamento manuale overlay
@@ -32,6 +33,14 @@ class MatchController extends GetxController {
     }
   }
   
+  void toggleHalfTime() {
+    halfTime.value = halfTime.value == '1° T' ? '2° T' : '1° T';
+    // Aggiorna immediatamente l'overlay
+    if (isRecording.value) {
+      _updateOverlay();
+    }
+  }
+  
   void _updateOverlay() {
     if (_cameraController == null) {
       print('⚠️ _cameraController non disponibile');
@@ -45,6 +54,7 @@ class MatchController extends GetxController {
         team1Score: team1Score.value,
         team2Score: team2Score.value,
         matchTime: formatMatchTime(matchTime.value),
+        halfTime: halfTime.value,
         isLandscape: isOverlayLandscape.value,
       );
     } catch (e) {

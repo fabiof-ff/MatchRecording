@@ -24,6 +24,7 @@ class WebVideoRecorder {
   int team1Score = 0;
   int team2Score = 0;
   String matchTime = '00:00';
+  String halfTime = '1° T';
   bool isLandscape = false; // Orientamento del dispositivo
   
   /// Aggiorna lo stream della camera (per switch camera durante registrazione)
@@ -47,6 +48,7 @@ class WebVideoRecorder {
     int? team1Score,
     int? team2Score,
     String? matchTime,
+    String? halfTime,
     bool? isLandscape,
   }) {
     if (team1Name != null) this.team1Name = team1Name;
@@ -54,10 +56,11 @@ class WebVideoRecorder {
     if (team1Score != null) this.team1Score = team1Score;
     if (team2Score != null) this.team2Score = team2Score;
     if (matchTime != null) this.matchTime = matchTime;
+    if (halfTime != null) this.halfTime = halfTime;
     if (isLandscape != null) this.isLandscape = isLandscape;
     
     // Debug: stampa i valori aggiornati
-    print('🎯 Overlay values: $team1Name $team1Score - $team2Score $team2Name | $matchTime | Landscape: ${this.isLandscape}');
+    print('🎯 Overlay values: $team1Name $team1Score - $team2Score $team2Name | $matchTime $halfTime | Landscape: ${this.isLandscape}');
   }
   
   /// Avvia la registrazione video web con overlay
@@ -351,47 +354,57 @@ class WebVideoRecorder {
       final margin = 12.0;
       final boxX = margin;
       final boxY = margin;
-      final boxWidth = 180.0;
-      final boxHeight = 32.0;
+      final boxWidth = 240.0; // Aumentato per contenere più info
+      final boxHeight = 50.0; // Aumentato per 2 righe
       final borderRadius = 8.0;
       
       ctx.fillStyle = bgColor;
       _drawRoundedRect(ctx, boxX, boxY, boxWidth, boxHeight, borderRadius);
       ctx.fill();
       
-      // Icona tempo
+      // Icona tempo + tempo + indicatore tempo
       ctx.fillStyle = textColor;
-      ctx.font = '14px Arial';
-      ctx.fillText('🕐', boxX + 10, boxY + 9);
+      ctx.font = '16px Arial'; // Font ingrandito
+      ctx.fillText('🕐', boxX + 12, boxY + 14);
       
-      // Testo tempo
-      ctx.font = 'bold 12px monospace';
+      ctx.font = 'bold 14px monospace'; // Font ingrandito
       ctx.textBaseline = 'middle';
-      ctx.fillText(matchTime, boxX + 35, boxY + boxHeight / 2);
+      ctx.fillText(matchTime, boxX + 40, boxY + 16);
       
-      // Separatore
+      // Indicatore tempo (1° T / 2° T)
+      ctx.font = 'bold 12px Arial';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.fillText(halfTime, boxX + 115, boxY + 16);
+      
+      // Separatore verticale
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(boxX + 110, boxY + 8);
-      ctx.lineTo(boxX + 110, boxY + boxHeight - 8);
+      ctx.moveTo(boxX + 150, boxY + 10);
+      ctx.lineTo(boxX + 150, boxY + boxHeight - 10);
       ctx.stroke();
       
-      // Punteggio compatto
-      ctx.font = 'bold 14px Arial';
+      // Nomi squadre (riga superiore)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.font = '11px Arial'; // Font ingrandito
       ctx.textAlign = 'center';
-      ctx.fillText('$team1Score-$team2Score', boxX + 145, boxY + boxHeight / 2);
+      ctx.fillText('$team1Name - $team2Name', boxX + 195, boxY + 18);
+      
+      // Punteggio (riga inferiore, più grande)
+      ctx.fillStyle = textColor;
+      ctx.font = 'bold 18px Arial'; // Font ingrandito
+      ctx.fillText('$team1Score-$team2Score', boxX + 195, boxY + 38);
       
     } else {
       // === LAYOUT VERTICALE ===
       final margin = 16.0;
       final borderRadius = 6.0;
       
-      // BOX TEMPO (in alto a sinistra)
+      // BOX TEMPO (in alto a sinistra) - più grande
       final timeBoxX = margin;
       final timeBoxY = margin;
-      final timeBoxWidth = 140.0;
-      final timeBoxHeight = 38.0;
+      final timeBoxWidth = 170.0; // Aumentato per tempo + 1°T/2°T
+      final timeBoxHeight = 42.0; // Aumentato
     
     ctx.fillStyle = bgColor;
     _drawRoundedRect(ctx, timeBoxX, timeBoxY, timeBoxWidth, timeBoxHeight, borderRadius);
@@ -399,19 +412,24 @@ class WebVideoRecorder {
     
     // Icona orologio
     ctx.fillStyle = textColor;
-    ctx.font = '16px Arial';
-    ctx.fillText('🕐', timeBoxX + 12, timeBoxY + 11);
+    ctx.font = '18px Arial'; // Font ingrandito
+    ctx.fillText('🕐', timeBoxX + 12, timeBoxY + 13);
     
     // Testo tempo
-    ctx.font = 'bold 14px monospace';
+    ctx.font = 'bold 16px monospace'; // Font ingrandito
     ctx.textBaseline = 'middle';
-    ctx.fillText(matchTime, timeBoxX + 40, timeBoxY + timeBoxHeight / 2);
+    ctx.fillText(matchTime, timeBoxX + 42, timeBoxY + timeBoxHeight / 2);
     
-    // BOX PUNTEGGIO (sotto il tempo)
+    // Indicatore tempo (1° T / 2° T)
+    ctx.font = 'bold 13px Arial'; // Font ingrandito
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.fillText(halfTime, timeBoxX + 125, timeBoxY + timeBoxHeight / 2);
+    
+    // BOX PUNTEGGIO (sotto il tempo) - più grande
     final scoreBoxX = timeBoxX;
-    final scoreBoxY = timeBoxY + timeBoxHeight + 8;
-    final scoreBoxWidth = 200.0;
-    final scoreBoxHeight = 80.0;
+    final scoreBoxY = timeBoxY + timeBoxHeight + 10;
+    final scoreBoxWidth = 240.0; // Aumentato
+    final scoreBoxHeight = 90.0; // Aumentato
     
     ctx.fillStyle = bgColor;
     _drawRoundedRect(ctx, scoreBoxX, scoreBoxY, scoreBoxWidth, scoreBoxHeight, 8.0);
@@ -421,29 +439,29 @@ class WebVideoRecorder {
     ctx.fillStyle = textColor;
     
     // Team 1
-    ctx.font = '10px Arial';
+    ctx.font = '12px Arial'; // Font ingrandito
     ctx.textAlign = 'center';
     final team1X = scoreBoxX + scoreBoxWidth / 4;
-    ctx.fillText(team1Name, team1X, scoreBoxY + 20);
+    ctx.fillText(team1Name, team1X, scoreBoxY + 22);
       
-      ctx.font = 'bold 18px Arial';
-      ctx.fillText('$team1Score', team1X, scoreBoxY + 45);
+      ctx.font = 'bold 22px Arial'; // Font ingrandito
+      ctx.fillText('$team1Score', team1X, scoreBoxY + 52);
       
       // Linea separatore verticale
       ctx.strokeStyle = textColor;
-      ctx.lineWidth = 1;
+      ctx.lineWidth = 1.5; // Linea più spessa
       ctx.beginPath();
       ctx.moveTo(scoreBoxX + scoreBoxWidth / 2, scoreBoxY + 15);
       ctx.lineTo(scoreBoxX + scoreBoxWidth / 2, scoreBoxY + scoreBoxHeight - 15);
       ctx.stroke();
       
       // Team 2
-      ctx.font = '10px Arial';
+      ctx.font = '12px Arial'; // Font ingrandito
       final team2X = scoreBoxX + 3 * scoreBoxWidth / 4;
-      ctx.fillText(team2Name, team2X, scoreBoxY + 20);
+      ctx.fillText(team2Name, team2X, scoreBoxY + 22);
     
-      ctx.font = 'bold 18px Arial';
-      ctx.fillText('$team2Score', team2X, scoreBoxY + 45);
+      ctx.font = 'bold 22px Arial'; // Font ingrandito
+      ctx.fillText('$team2Score', team2X, scoreBoxY + 52);
     }
     
     ctx.restore();
