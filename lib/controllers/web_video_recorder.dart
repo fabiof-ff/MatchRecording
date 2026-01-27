@@ -44,17 +44,63 @@ class WebVideoRecorder {
   /// Avvia la registrazione video web con overlay
   Future<void> startRecording() async {
     try {
-      // Richiedi accesso alla camera e microfono
-      _cameraStream = await html.window.navigator.mediaDevices?.getUserMedia({
-        'video': {
-          'width': {'ideal': 1920},
-          'height': {'ideal': 1080},
+      // Prova constraint multipli in ordine di preferenza per massima compatibilità
+      print('📹 Tentativo di accesso alla camera...');
+      
+      final constraints = [
+        // Constraint 1: Camera posteriore con resolution ideale (Android)
+        {
+          'video': {
+            'facingMode': 'environment',
+            'width': {'ideal': 1280},
+            'height': {'ideal': 720},
+          },
+          'audio': true,
         },
-        'audio': true,
-      });
+        // Constraint 2: Camera frontale con resolution ideale
+        {
+          'video': {
+            'facingMode': 'user',
+            'width': {'ideal': 1280},
+            'height': {'ideal': 720},
+          },
+          'audio': true,
+        },
+        // Constraint 3: Qualsiasi camera con resolution
+        {
+          'video': {
+            'width': {'ideal': 1280},
+            'height': {'ideal': 720},
+          },
+          'audio': true,
+        },
+        // Constraint 4: Solo video generico (ultimo fallback)
+        {
+          'video': true,
+          'audio': true,
+        },
+      ];
+      
+      Exception? lastError;
+      for (var i = 0; i < constraints.length; i++) {
+        try {
+          print('📹 Tentativo ${i + 1}/${constraints.length}...');
+          _cameraStream = await html.window.navigator.mediaDevices?.getUserMedia(constraints[i]);
+          if (_cameraStream != null) {
+            print('✅ Camera acquisita con constraint ${i + 1}');
+            break;
+          }
+        } catch (e) {
+          print('❌ Constraint ${i + 1} fallito: $e');
+          lastError = e is Exception ? e : Exception(e.toString());
+          if (i == constraints.length - 1) {
+            throw lastError;
+          }
+        }
+      }
 
       if (_cameraStream == null) {
-        throw Exception('Impossibile accedere alla camera');
+        throw Exception('Impossibile accedere alla camera dopo ${constraints.length} tentativi');
       }
 
       // Crea video element per lo stream della camera
@@ -62,17 +108,29 @@ class WebVideoRecorder {
         ..autoplay = true
         ..muted = true
         ..srcObject = _cameraStream;
+      
+      // Imposta playsinline per iOS/Safari
+      _videoElement!.setAttribute('playsinline', 'true');
+      
+      print('📹 Video element creato, attesa metadata...');
 
       // Attendi che il video sia pronto e avvialo
       await _videoElement!.onLoadedMetadata.first;
-      await _videoElement!.play();
+      print('📹 Metadata caricati');
       
-      // Attendi un frame per essere sicuri che il video stia effettivamente riproducendo
-      await Future.delayed(const Duration(milliseconds: 100));
+      await _videoElement!.play();
+      print('📹 Video.play() chiamato');
+      
+      // Attendi per essere sicuri che il video stia effettivamente riproducendo
+      await Future.delayed(const Duration(milliseconds: 300));
       
       // Crea canvas per composizione video + overlay
       final videoWidth = _videoElement!.videoWidth;
       final videoHeight = _videoElement!.videoHeight;
+      
+      if (videoWidth == 0 || videoHeight == 0) {
+        throw Exception('Video non inizializzato correttamente: ${videoWidth}x${videoHeight}');
+      }
       
       print('📐 Dimensioni video: ${videoWidth}x${videoHeight}');
       
