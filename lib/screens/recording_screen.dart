@@ -148,7 +148,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                           left: -100,
                           top: 60, // Centrato verticalmente
                           child: Transform.rotate(
-                            angle: 1.5708, // 90 gradi in radianti (π/2)
+                            angle: -1.5708, // -90 gradi in radianti (-π/2)
                             origin: const Offset(0, 0),
                             child: Container(
                               width: 550, // Ingrandito ulteriormente
