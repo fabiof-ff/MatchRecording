@@ -339,9 +339,11 @@ class WebVideoRecorder {
     
     // Se in modalità landscape, ruota il canvas di 90 gradi
     if (isLandscape) {
-      ctx.translate(16.0, 16.0); // Sposta all'origine della rotazione
-      ctx.rotate(1.5708); // 90 gradi in radianti (π/2)
-      ctx.translate(-16.0, -16.0); // Riporta indietro
+      // Per ruotare correttamente, spostiamo l'origine al punto di rotazione
+      // poi ruotiamo, poi disegniamo normalmente
+      ctx.translate(0, height.toDouble()); // Sposta in basso a sinistra
+      ctx.rotate(-1.5708); // Ruota -90 gradi (senso orario)
+      // Ora l'overlay sarà disegnato come se fosse su un canvas ruotato
     }
     
     // Parametri base (in px del video)

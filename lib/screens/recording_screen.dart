@@ -139,13 +139,18 @@ class _RecordingScreenState extends State<RecordingScreen> {
                       final isLandscape = matchController.isOverlayLandscape.value;
                       
                       if (isLandscape) {
-                        // LAYOUT LANDSCAPE COMPLETO
-                        return Stack(
-                          children: [
-                            // 1. Overlay compatto in alto a sinistra
-                            Positioned(
-                              top: 12,
-                              left: 12,
+                        // LAYOUT LANDSCAPE COMPLETO - RUOTATO DI 90 GRADI
+                        return Transform.rotate(
+                          angle: 1.5708, // 90 gradi in radianti (π/2)
+                          alignment: Alignment.topLeft,
+                          child: Transform.translate(
+                            offset: const Offset(0, -300), // Sposta per compensare la rotazione
+                            child: Stack(
+                              children: [
+                                // 1. Overlay compatto in alto a sinistra
+                                Positioned(
+                                  top: 12,
+                                  left: 12,
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                 decoration: BoxDecoration(
@@ -483,6 +488,8 @@ class _RecordingScreenState extends State<RecordingScreen> {
                               ),
                             ),
                           ],
+                        ),
+                          ),
                         );
                       } else {
                         // LAYOUT VERTICALE - originale invariato
