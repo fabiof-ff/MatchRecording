@@ -25,6 +25,20 @@ class WebVideoRecorder {
   int team2Score = 0;
   String matchTime = '00:00';
   
+  /// Aggiorna lo stream della camera (per switch camera durante registrazione)
+  void updateCameraStream(html.MediaStream newStream) {
+    print('🔄 Aggiornamento stream camera nel recorder');
+    
+    // Aggiorna il riferimento allo stream
+    _cameraStream = newStream;
+    
+    // Se il video element esiste, aggiorna anche quello
+    if (_videoElement != null) {
+      _videoElement!.srcObject = newStream;
+      print('✅ Video element aggiornato con nuovo stream');
+    }
+  }
+  
   /// Aggiorna i dati dell'overlay
   void updateOverlay({
     String? team1Name,

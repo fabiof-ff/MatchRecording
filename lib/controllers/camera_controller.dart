@@ -54,6 +54,13 @@ class CameraRecordingController extends GetxController {
     return videosSaveDirectory.value;
   }
   
+  /// Aggiorna lo stream della camera (per switch camera)
+  void updateCameraStream(dynamic newStream) {
+    if (kIsWeb && _webRecorder != null) {
+      _webRecorder!.updateCameraStream(newStream);
+    }
+  }
+  
   /// Aggiorna i dati dell'overlay per la registrazione web
   void updateOverlay({
     String? team1Name,

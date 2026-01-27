@@ -76,6 +76,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                           onCameraReady: (switchCamera) {
                             _switchCameraCallback = switchCamera;
                           },
+                          cameraController: _cameraRecordingController,
                         )
                       else
                         CameraPreview(_cameraRecordingController.cameraController),

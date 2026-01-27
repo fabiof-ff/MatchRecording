@@ -6,8 +6,13 @@ import 'dart:ui_web' as ui_web;
 /// Widget per mostrare il video preview della camera web
 class WebCameraPreview extends StatefulWidget {
   final Function(Function() switchCamera)? onCameraReady;
+  final dynamic cameraController; // CameraRecordingController per aggiornare lo stream
   
-  const WebCameraPreview({Key? key, this.onCameraReady}) : super(key: key);
+  const WebCameraPreview({
+    Key? key, 
+    this.onCameraReady,
+    this.cameraController,
+  }) : super(key: key);
 
   @override
   State<WebCameraPreview> createState() => _WebCameraPreviewState();
@@ -146,6 +151,12 @@ class _WebCameraPreviewState extends State<WebCameraPreview> {
       if (stream != null) {
         _videoElement!.srcObject = stream;
         print('✅ Camera cambiata a: ${_useFrontCamera ? "frontale" : "posteriore"}');
+        
+        // Aggiorna anche lo stream nel recorder se è in registrazione
+        if (widget.cameraController != null) {
+          widget.cameraController.updateCameraStream(stream);
+          print('📹 Stream aggiornato nel recorder');
+        }
       }
     } catch (e) {
       print('❌ Errore cambio camera: $e');
