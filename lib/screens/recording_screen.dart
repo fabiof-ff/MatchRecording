@@ -143,12 +143,12 @@ class _RecordingScreenState extends State<RecordingScreen> {
                       final isLandscape = matchController.isOverlayLandscape.value;
                       
                       if (isLandscape) {
-                        // LAYOUT LANDSCAPE COMPLETO - RUOTATO DI 90 GRADI
+                        // LAYOUT LANDSCAPE COMPLETO - SENZA ROTAZIONE
                         return Positioned(
                           left: -100,
                           top: 60, // Centrato verticalmente
                           child: Transform.rotate(
-                            angle: -1.5708, // -90 gradi in radianti (-π/2)
+                            angle: 0, // Nessuna rotazione
                             origin: const Offset(0, 0),
                             child: Container(
                               width: 550, // Ingrandito ulteriormente
@@ -210,10 +210,9 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                           children: [
                                             Text(
                                               matchController.team1Name.value,
-                                              style: TextStyle(
-                                                color: matchController.team1Color.value,
+                                              style: const TextStyle(
+                                                color: Colors.white70,
                                                 fontSize: 10,
-                                                fontWeight: FontWeight.bold,
                                               ),
                                             ),
                                             Text(
@@ -225,10 +224,9 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                             ),
                                             Text(
                                               matchController.team2Name.value,
-                                              style: TextStyle(
-                                                color: matchController.team2Color.value,
+                                              style: const TextStyle(
+                                                color: Colors.white70,
                                                 fontSize: 10,
-                                                fontWeight: FontWeight.bold,
                                               ),
                                             ),
                                           ],

@@ -351,10 +351,8 @@ class WebVideoRecorder {
     final textColor = 'white';
     
     if (isLandscape) {
-      // === LAYOUT LANDSCAPE COMPATTO (ruotato) ===
-      // Ruota il canvas - trasla in basso a sinistra e ruota per posizionare in alto a sinistra
-      ctx.translate(0, height.toDouble());
-      ctx.rotate(-1.5708); // -90 gradi (senso antiorario)
+      // === LAYOUT LANDSCAPE COMPATTO (senza rotazione) ===
+      // Nessuna rotazione del canvas
       
       // Overlay compatto in alto a sinistra (dopo rotazione)
       final margin = 12.0;
