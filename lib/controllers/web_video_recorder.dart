@@ -54,8 +54,8 @@ class WebVideoRecorder {
         {
           'video': {
             'facingMode': 'environment',
-            'width': {'ideal': 1280},
-            'height': {'ideal': 720},
+            'width': {'ideal': 1920},
+            'height': {'ideal': 1080},
           },
           'audio': true,
         },
@@ -63,16 +63,16 @@ class WebVideoRecorder {
         {
           'video': {
             'facingMode': 'user',
-            'width': {'ideal': 1280},
-            'height': {'ideal': 720},
+            'width': {'ideal': 1920},
+            'height': {'ideal': 1080},
           },
           'audio': true,
         },
         // Constraint 3: Qualsiasi camera con resolution
         {
           'video': {
-            'width': {'ideal': 1280},
-            'height': {'ideal': 720},
+            'width': {'ideal': 1920},
+            'height': {'ideal': 1080},
           },
           'audio': true,
         },
