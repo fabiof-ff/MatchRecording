@@ -335,45 +335,93 @@ class WebVideoRecorder {
       print('🎨 Drawing overlay: $team1Name $team1Score - $team2Score $team2Name | $matchTime | Landscape: $isLandscape');
     }
     
-    // Usa la variabile isLandscape invece di calcolare dalle dimensioni
-    final scaleFactor = isLandscape ? 0.7 : 1.0; // Riduci dimensioni in landscape
-    
-    // Salva stato
     ctx.save();
     
-    // Font e stile
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-    final fontSize = (32 * scaleFactor).round();
-    ctx.font = 'bold ${fontSize}px Arial';
-    ctx.textBaseline = 'top';
+    // Parametri base (in px del video)
+    final margin = 16.0;
+    final borderRadius = 6.0;
     
-    // Margini e dimensioni adattivi
-    final margin = (20 * scaleFactor).round();
-    final padding = (40 * scaleFactor).round();
-    final boxHeight = (60 * scaleFactor).round();
+    // Colori
+    final bgColor = 'rgba(0, 0, 0, 0.6)';
+    final textColor = 'white';
     
-    // Box in alto a sinistra - Tempo partita
-    final timeText = matchTime;
-    final timeWidth = ctx.measureText(timeText).width! + padding;
-    ctx.fillRect(margin, margin, timeWidth, boxHeight);
-    ctx.fillStyle = 'white';
-    ctx.fillText(timeText, margin + (padding / 2), margin + (boxHeight - fontSize) / 2);
+    // === BOX TEMPO (in alto a sinistra) ===
+    ctx.fillStyle = bgColor;
+    final timeBoxX = margin;
+    final timeBoxY = margin;
+    final timeBoxWidth = 140.0;
+    final timeBoxHeight = 38.0;
     
-    // Box punteggio - posizione adattiva
-    final scoreText = '$team1Name $team1Score - $team2Score $team2Name';
-    final scoreWidth = ctx.measureText(scoreText).width! + (60 * scaleFactor);
-    final scoreX = isLandscape 
-        ? width - scoreWidth - margin  // In landscape: in alto a destra
-        : (width - scoreWidth) / 2;     // In portrait: centrato
-    final scoreY = margin;
+    // Disegna rettangolo con bordi arrotondati per tempo
+    _drawRoundedRect(ctx, timeBoxX, timeBoxY, timeBoxWidth, timeBoxHeight, borderRadius);
+    ctx.fill();
     
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-    ctx.fillRect(scoreX, scoreY, scoreWidth, boxHeight);
-    ctx.fillStyle = 'white';
-    ctx.fillText(scoreText, scoreX + (30 * scaleFactor), scoreY + (boxHeight - fontSize) / 2);
+    // Icona orologio (simbolo)
+    ctx.fillStyle = textColor;
+    ctx.font = '16px Arial';
+    ctx.fillText('🕐', timeBoxX + 12, timeBoxY + 11);
     
-    // Ripristina stato
+    // Testo tempo
+    ctx.font = 'bold 14px monospace';
+    ctx.textBaseline = 'middle';
+    final timeTextX = timeBoxX + 40;
+    final timeTextY = timeBoxY + timeBoxHeight / 2;
+    ctx.fillText(matchTime, timeTextX, timeTextY);
+    
+    // === BOX PUNTEGGIO ===
+    final scoreBoxX = timeBoxX;
+    final scoreBoxY = timeBoxY + timeBoxHeight + 8;
+    final scoreBoxWidth = 200.0;
+    final scoreBoxHeight = 80.0;
+    
+    ctx.fillStyle = bgColor;
+    _drawRoundedRect(ctx, scoreBoxX, scoreBoxY, scoreBoxWidth, scoreBoxHeight, 8.0);
+    ctx.fill();
+    
+    // Testo squadre e punteggi
+    ctx.fillStyle = textColor;
+    
+    // Team 1
+    ctx.font = '10px Arial';
+    ctx.textAlign = 'center';
+    final team1X = scoreBoxX + scoreBoxWidth / 4;
+    ctx.fillText(team1Name, team1X, scoreBoxY + 20);
+    
+    ctx.font = 'bold 18px Arial';
+    ctx.fillText('$team1Score', team1X, scoreBoxY + 45);
+    
+    // Linea separatore verticale
+    ctx.strokeStyle = textColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(scoreBoxX + scoreBoxWidth / 2, scoreBoxY + 15);
+    ctx.lineTo(scoreBoxX + scoreBoxWidth / 2, scoreBoxY + scoreBoxHeight - 15);
+    ctx.stroke();
+    
+    // Team 2
+    ctx.font = '10px Arial';
+    final team2X = scoreBoxX + 3 * scoreBoxWidth / 4;
+    ctx.fillText(team2Name, team2X, scoreBoxY + 20);
+    
+    ctx.font = 'bold 18px Arial';
+    ctx.fillText('$team2Score', team2X, scoreBoxY + 45);
+    
     ctx.restore();
+  }
+  
+  /// Disegna rettangolo con angoli arrotondati
+  void _drawRoundedRect(html.CanvasRenderingContext2D ctx, double x, double y, double width, double height, double radius) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.arcTo(x + width, y, x + width, y + radius, radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.arcTo(x + width, y + height, x + width - radius, y + height, radius);
+    ctx.lineTo(x + radius, y + height);
+    ctx.arcTo(x, y + height, x, y + height - radius, radius);
+    ctx.lineTo(x, y + radius);
+    ctx.arcTo(x, y, x + radius, y, radius);
+    ctx.closePath();
   }
 
   /// Verifica se è in registrazione

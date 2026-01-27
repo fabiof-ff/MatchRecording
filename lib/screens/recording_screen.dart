@@ -48,13 +48,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
   Widget build(BuildContext context) {
     final matchController = Get.find<MatchController>();
 
-    return OrientationBuilder(
-      builder: (context, orientation) {
-        // Aggiorna l'orientamento nel match controller
-        final isLandscape = orientation == Orientation.landscape;
-        matchController.setOrientation(isLandscape);
-        
-        return WillPopScope(
+    return WillPopScope(
       onWillPop: () async {
         if (matchController.isRecording.value) {
           matchController.stopRecording();
@@ -143,10 +137,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                   Positioned(
                     top: 16,
                     left: 16,
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
-                        return Column(
+                    child: Column(
                       spacing: 8,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -241,8 +232,6 @@ class _RecordingScreenState extends State<RecordingScreen> {
                           ),
                         ),
                       ],
-                    );
-                      },
                     ),
                   ),
 
@@ -251,12 +240,9 @@ class _RecordingScreenState extends State<RecordingScreen> {
                     bottom: 0,
                     left: 0,
                     right: 0,
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
-                        return Container(
+                    child: Container(
                       color: Colors.black.withOpacity(0.4),
-                      padding: EdgeInsets.all(isLandscape ? 8 : 16),
+                      padding: const EdgeInsets.all(16),
                       child: Column(
                         spacing: 12,
                         children: [
@@ -364,7 +350,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
 
                           // Action buttons
                           Row(
-                            spacing: isLandscape ? 8 : 12,
+                            spacing: 12,
                             children: [
                               // Highlight button
                               Expanded(
@@ -425,6 +411,33 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                   ),
                                   tooltip: 'Cambia camera',
                                 ),
+                              
+                              // Toggle overlay orientation button
+                              if (kIsWeb)
+                                Obx(
+                                  () => IconButton(
+                                    onPressed: () {
+                                      final currentOrientation = matchController.isOverlayLandscape.value;
+                                      matchController.toggleOverlayOrientation();
+                                      Get.snackbar(
+                                        'Orientamento Overlay',
+                                        currentOrientation ? 'Verticale' : 'Orizzontale',
+                                        duration: const Duration(seconds: 1),
+                                        snackPosition: SnackPosition.TOP,
+                                      );
+                                    },
+                                    icon: Icon(
+                                      matchController.isOverlayLandscape.value 
+                                        ? Icons.stay_current_portrait 
+                                        : Icons.stay_current_landscape,
+                                    ),
+                                    color: Colors.white,
+                                    style: IconButton.styleFrom(
+                                      backgroundColor: Colors.black.withOpacity(0.6),
+                                    ),
+                                    tooltip: 'Cambia orientamento overlay',
+                                  ),
+                                ),
                             ],
                           ),
 
@@ -472,8 +485,6 @@ class _RecordingScreenState extends State<RecordingScreen> {
                           ),
                         ],
                       ),
-                    );
-                      },
                     ),
                   ),
                 ],
@@ -486,8 +497,6 @@ class _RecordingScreenState extends State<RecordingScreen> {
           },
         ),
       ),
-      );
-      },
     );
   }
 }

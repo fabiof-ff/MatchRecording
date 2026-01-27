@@ -14,19 +14,19 @@ class MatchController extends GetxController {
   final team2Name = 'Squadra 2'.obs;
   final highlights = RxList<Highlight>([]);
   final recordedVideoPath = ''.obs;
+  final isOverlayLandscape = false.obs; // Orientamento manuale overlay
 
   Timer? _timer;
   CameraRecordingController? _cameraController;
-  bool _isLandscape = false;
 
   void setCameraController(CameraRecordingController controller) {
     _cameraController = controller;
     print('✅ CameraRecordingController collegato al MatchController');
   }
   
-  void setOrientation(bool isLandscape) {
-    _isLandscape = isLandscape;
-    // Aggiorna immediatamente l'overlay con il nuovo orientamento
+  void toggleOverlayOrientation() {
+    isOverlayLandscape.value = !isOverlayLandscape.value;
+    // Aggiorna immediatamente l'overlay
     if (isRecording.value) {
       _updateOverlay();
     }
@@ -38,14 +38,14 @@ class MatchController extends GetxController {
       return;
     }
     try {
-      print('🔄 _updateOverlay chiamato: ${team1Name.value} ${team1Score.value} - ${team2Score.value} ${team2Name.value} | ${formatMatchTime(matchTime.value)} | Landscape: $_isLandscape');
+      print('🔄 _updateOverlay chiamato: ${team1Name.value} ${team1Score.value} - ${team2Score.value} ${team2Name.value} | ${formatMatchTime(matchTime.value)} | Landscape: ${isOverlayLandscape.value}');
       _cameraController!.updateOverlay(
         team1Name: team1Name.value,
         team2Name: team2Name.value,
         team1Score: team1Score.value,
         team2Score: team2Score.value,
         matchTime: formatMatchTime(matchTime.value),
-        isLandscape: _isLandscape,
+        isLandscape: isOverlayLandscape.value,
       );
     } catch (e) {
       print('❌ Errore in _updateOverlay: $e');
