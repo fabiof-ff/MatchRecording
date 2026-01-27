@@ -145,14 +145,14 @@ class _RecordingScreenState extends State<RecordingScreen> {
                       if (isLandscape) {
                         // LAYOUT LANDSCAPE COMPLETO - RUOTATO DI 90 GRADI
                         return Positioned(
-                          left: -80,
-                          top: 80, // Centrato verticalmente
+                          left: -100,
+                          top: 60, // Centrato verticalmente
                           child: Transform.rotate(
                             angle: 1.5708, // 90 gradi in radianti (π/2)
                             origin: const Offset(0, 0),
                             child: Container(
-                              width: 450, // Ingrandito per occupare meglio lo schermo
-                              height: 350, // Ingrandito per occupare meglio lo schermo
+                              width: 550, // Ingrandito ulteriormente
+                              height: 400, // Ingrandito ulteriormente
                               child: Stack(
                                 children: [
                                   // 1. Overlay compatto in alto a sinistra

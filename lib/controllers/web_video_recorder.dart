@@ -337,30 +337,61 @@ class WebVideoRecorder {
     
     ctx.save();
     
-    // Se in modalità landscape, ruota il canvas di 90 gradi
-    if (isLandscape) {
-      // Per ruotare correttamente, spostiamo l'origine al punto di rotazione
-      // poi ruotiamo, poi disegniamo normalmente
-      ctx.translate(0, height.toDouble()); // Sposta in basso a sinistra
-      ctx.rotate(-1.5708); // Ruota -90 gradi (senso orario)
-      // Ora l'overlay sarà disegnato come se fosse su un canvas ruotato
-    }
-    
-    // Parametri base (in px del video)
-    final margin = 16.0;
-    final borderRadius = 6.0;
-    
     // Colori
-    final bgColor = 'rgba(0, 0, 0, 0.6)';
+    final bgColor = 'rgba(0, 0, 0, 0.7)';
     final textColor = 'white';
     
-    // === LAYOUT VERTICALE UNICO (sempre uguale) ===
-    
-    // BOX TEMPO (in alto a sinistra)
-    final timeBoxX = margin;
-    final timeBoxY = margin;
-    final timeBoxWidth = 140.0;
-    final timeBoxHeight = 38.0;
+    if (isLandscape) {
+      // === LAYOUT LANDSCAPE COMPATTO (ruotato) ===
+      // Ruota il canvas
+      ctx.translate(0, height.toDouble());
+      ctx.rotate(-1.5708); // -90 gradi
+      
+      // Overlay compatto in alto a sinistra
+      final margin = 12.0;
+      final boxX = margin;
+      final boxY = margin;
+      final boxWidth = 180.0;
+      final boxHeight = 32.0;
+      final borderRadius = 8.0;
+      
+      ctx.fillStyle = bgColor;
+      _drawRoundedRect(ctx, boxX, boxY, boxWidth, boxHeight, borderRadius);
+      ctx.fill();
+      
+      // Icona tempo
+      ctx.fillStyle = textColor;
+      ctx.font = '14px Arial';
+      ctx.fillText('🕐', boxX + 10, boxY + 9);
+      
+      // Testo tempo
+      ctx.font = 'bold 12px monospace';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(matchTime, boxX + 35, boxY + boxHeight / 2);
+      
+      // Separatore
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(boxX + 110, boxY + 8);
+      ctx.lineTo(boxX + 110, boxY + boxHeight - 8);
+      ctx.stroke();
+      
+      // Punteggio compatto
+      ctx.font = 'bold 14px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('$team1Score-$team2Score', boxX + 145, boxY + boxHeight / 2);
+      
+    } else {
+      // === LAYOUT VERTICALE ===
+      final margin = 16.0;
+      final borderRadius = 6.0;
+      
+      // BOX TEMPO (in alto a sinistra)
+      final timeBoxX = margin;
+      final timeBoxY = margin;
+      final timeBoxWidth = 140.0;
+      final timeBoxHeight = 38.0;
     
     ctx.fillStyle = bgColor;
     _drawRoundedRect(ctx, timeBoxX, timeBoxY, timeBoxWidth, timeBoxHeight, borderRadius);
@@ -411,8 +442,8 @@ class WebVideoRecorder {
       final team2X = scoreBoxX + 3 * scoreBoxWidth / 4;
       ctx.fillText(team2Name, team2X, scoreBoxY + 20);
     
-    ctx.font = 'bold 18px Arial';
-    ctx.fillText('$team2Score', team2X, scoreBoxY + scoreBoxHeight - 20);
+      ctx.fillText('$team2Score', team2X, scoreBoxY + scoreBoxHeight - 20);
+    }
     
     ctx.restore();
   }
