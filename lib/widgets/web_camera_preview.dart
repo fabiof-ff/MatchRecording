@@ -27,19 +27,60 @@ class _WebCameraPreviewState extends State<WebCameraPreview> {
       // Crea elemento video
       _videoElement = html.VideoElement()
         ..autoplay = true
-        ..muted = false
+        ..muted = true  // Muto per non riprodurre l'audio del microfono
         ..style.width = '100%'
         ..style.height = '100%'
         ..style.objectFit = 'cover';
 
-      // Richiedi accesso alla camera
-      final stream = await html.window.navigator.mediaDevices?.getUserMedia({
-        'video': {
-          'width': {'ideal': 1920},
-          'height': {'ideal': 1080},
+      // Richiedi accesso alla camera con constraints multipli per compatibilità
+      // Prova prima camera posteriore (environment), poi fallback
+      final constraints = [
+        // Constraint 1: Camera posteriore con resolution ideale
+        {
+          'video': {
+            'facingMode': 'environment',
+            'width': {'ideal': 1920},
+            'height': {'ideal': 1080},
+          },
+          'audio': true,
         },
-        'audio': true,
-      });
+        // Constraint 2: Camera frontale con resolution ideale (fallback)
+        {
+          'video': {
+            'facingMode': 'user',
+            'width': {'ideal': 1920},
+            'height': {'ideal': 1080},
+          },
+          'audio': true,
+        },
+        // Constraint 3: Qualsiasi camera con resolution (fallback)
+        {
+          'video': {
+            'width': {'ideal': 1920},
+            'height': {'ideal': 1080},
+          },
+          'audio': true,
+        },
+        // Constraint 4: Solo video generico (ultimo fallback)
+        {
+          'video': true,
+          'audio': true,
+        },
+      ];
+
+      html.MediaStream? stream;
+      for (var i = 0; i < constraints.length; i++) {
+        try {
+          stream = await html.window.navigator.mediaDevices?.getUserMedia(constraints[i]);
+          if (stream != null) {
+            print('✅ Camera preview acquisita con constraint ${i + 1}');
+            break;
+          }
+        } catch (e) {
+          print('❌ Preview constraint ${i + 1} fallito: $e');
+          if (i == constraints.length - 1) rethrow;
+        }
+      }
 
       if (stream != null) {
         _videoElement!.srcObject = stream;
