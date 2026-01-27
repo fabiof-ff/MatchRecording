@@ -20,9 +20,9 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
-  runApp(const MatchRecordingApp());
+  ]).then((_) {
+    runApp(const MatchRecordingApp());
+  });
 }
 
 class MatchRecordingApp extends StatelessWidget {
