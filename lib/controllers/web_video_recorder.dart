@@ -332,29 +332,43 @@ class WebVideoRecorder {
       print('🎨 Drawing overlay: $team1Name $team1Score - $team2Score $team2Name | $matchTime');
     }
     
+    // Determina se è landscape (larghezza > altezza)
+    final isLandscape = width > height;
+    final scaleFactor = isLandscape ? 0.7 : 1.0; // Riduci dimensioni in landscape
+    
     // Salva stato
     ctx.save();
     
     // Font e stile
     ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-    ctx.font = 'bold 32px Arial';
+    final fontSize = (32 * scaleFactor).round();
+    ctx.font = 'bold ${fontSize}px Arial';
     ctx.textBaseline = 'top';
+    
+    // Margini e dimensioni adattivi
+    final margin = (20 * scaleFactor).round();
+    final padding = (40 * scaleFactor).round();
+    final boxHeight = (60 * scaleFactor).round();
     
     // Box in alto a sinistra - Tempo partita
     final timeText = matchTime;
-    final timeWidth = ctx.measureText(timeText).width! + 40;
-    ctx.fillRect(20, 20, timeWidth, 60);
+    final timeWidth = ctx.measureText(timeText).width! + padding;
+    ctx.fillRect(margin, margin, timeWidth, boxHeight);
     ctx.fillStyle = 'white';
-    ctx.fillText(timeText, 40, 35);
+    ctx.fillText(timeText, margin + (padding / 2), margin + (boxHeight - fontSize) / 2);
     
-    // Box punteggio - Centro alto
+    // Box punteggio - posizione adattiva
     final scoreText = '$team1Name $team1Score - $team2Score $team2Name';
-    final scoreWidth = ctx.measureText(scoreText).width! + 60;
-    final scoreX = (width - scoreWidth) / 2;
+    final scoreWidth = ctx.measureText(scoreText).width! + (60 * scaleFactor);
+    final scoreX = isLandscape 
+        ? width - scoreWidth - margin  // In landscape: in alto a destra
+        : (width - scoreWidth) / 2;     // In portrait: centrato
+    final scoreY = margin;
+    
     ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-    ctx.fillRect(scoreX, 20, scoreWidth, 60);
+    ctx.fillRect(scoreX, scoreY, scoreWidth, boxHeight);
     ctx.fillStyle = 'white';
-    ctx.fillText(scoreText, scoreX + 30, 35);
+    ctx.fillText(scoreText, scoreX + (30 * scaleFactor), scoreY + (boxHeight - fontSize) / 2);
     
     // Ripristina stato
     ctx.restore();

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -18,6 +19,13 @@ class _RecordingScreenState extends State<RecordingScreen> {
   @override
   void initState() {
     super.initState();
+    // Abilita tutti gli orientamenti per la registrazione
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+    
     // Inizializza il camera controller
     _cameraRecordingController = Get.put(CameraRecordingController());
     
@@ -28,6 +36,10 @@ class _RecordingScreenState extends State<RecordingScreen> {
 
   @override
   void dispose() {
+    // Ripristina solo orientamento portrait quando esci
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
     // Non dispose qui perché GetX lo farà automaticamente
     super.dispose();
   }
@@ -125,7 +137,10 @@ class _RecordingScreenState extends State<RecordingScreen> {
                   Positioned(
                     top: 16,
                     left: 16,
-                    child: Column(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+                        return Column(
                       spacing: 8,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -220,6 +235,8 @@ class _RecordingScreenState extends State<RecordingScreen> {
                           ),
                         ),
                       ],
+                    );
+                      },
                     ),
                   ),
 
@@ -228,9 +245,12 @@ class _RecordingScreenState extends State<RecordingScreen> {
                     bottom: 0,
                     left: 0,
                     right: 0,
-                    child: Container(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+                        return Container(
                       color: Colors.black.withOpacity(0.4),
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(isLandscape ? 8 : 16),
                       child: Column(
                         spacing: 12,
                         children: [
@@ -338,7 +358,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
 
                           // Action buttons
                           Row(
-                            spacing: 12,
+                            spacing: isLandscape ? 8 : 12,
                             children: [
                               // Highlight button
                               Expanded(
@@ -446,6 +466,8 @@ class _RecordingScreenState extends State<RecordingScreen> {
                           ),
                         ],
                       ),
+                    );
+                      },
                     ),
                   ),
                 ],
