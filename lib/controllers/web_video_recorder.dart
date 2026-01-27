@@ -442,7 +442,8 @@ class WebVideoRecorder {
       final team2X = scoreBoxX + 3 * scoreBoxWidth / 4;
       ctx.fillText(team2Name, team2X, scoreBoxY + 20);
     
-      ctx.fillText('$team2Score', team2X, scoreBoxY + scoreBoxHeight - 20);
+      ctx.font = 'bold 18px Arial';
+      ctx.fillText('$team2Score', team2X, scoreBoxY + 45);
     }
     
     ctx.restore();
