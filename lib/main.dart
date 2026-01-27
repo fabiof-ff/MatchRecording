@@ -16,6 +16,12 @@ import 'screens/recording_screen.dart';
 import 'screens/highlights_screen.dart';
 
 void main() {
+  // Blocca l'orientamento in portrait mode
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   runApp(const MatchRecordingApp());
 }
 
