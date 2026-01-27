@@ -15,7 +15,7 @@ class MatchController extends GetxController {
   final halfTime = '1° T'.obs; // Primo o secondo tempo
   final highlights = RxList<Highlight>([]);
   final recordedVideoPath = ''.obs;
-  final isOverlayLandscape = false.obs; // Orientamento manuale overlay
+  final isOverlayLandscape = true.obs; // Overlay sempre in orizzontale di default
 
   Timer? _timer;
   CameraRecordingController? _cameraController;
