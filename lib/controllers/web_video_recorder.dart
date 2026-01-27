@@ -343,11 +343,11 @@ class WebVideoRecorder {
     
     if (isLandscape) {
       // === LAYOUT LANDSCAPE COMPATTO (ruotato) ===
-      // Ruota il canvas
-      ctx.translate(0, height.toDouble());
-      ctx.rotate(-1.5708); // -90 gradi
+      // Ruota il canvas - trasla in alto a destra e ruota per posizionare in alto a sinistra
+      ctx.translate(width.toDouble(), 0);
+      ctx.rotate(1.5708); // +90 gradi (senso antiorario)
       
-      // Overlay compatto in alto a sinistra
+      // Overlay compatto in alto a sinistra (dopo rotazione)
       final margin = 12.0;
       final boxX = margin;
       final boxY = margin;
