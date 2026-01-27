@@ -139,12 +139,13 @@ class _RecordingScreenState extends State<RecordingScreen> {
                     left: 16,
                     child: Obx(
                       () {
-                        final isLandscape = matchController.isOverlayLandscape.value;
-                        
-                        if (isLandscape) {
-                          // Layout orizzontale - tutto in una riga
-                          return Row(
+                        // Applica rotazione di 90 gradi quando in modalità orizzontale
+                        return Transform.rotate(
+                          angle: matchController.isOverlayLandscape.value ? 1.5708 : 0, // 90 gradi = π/2 radianti
+                          alignment: Alignment.topLeft,
+                          child: Column(
                             spacing: 8,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Match time
                               Container(
@@ -231,102 +232,8 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                 ),
                               ),
                             ],
-                          );
-                        } else {
-                          // Layout verticale - originale
-                          return Column(
-                      spacing: 8,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Match time
-                        Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.6),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Row(
-                              spacing: 4,
-                              children: [
-                                const Icon(Icons.schedule, color: Colors.white, size: 16),
-                                Text(
-                                  matchController.formatMatchTime(matchController.matchTime.value),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    fontFamily: 'monospace',
-                                  ),
-                                ),
-                              ],
-                            ),
                           ),
-
-                        // Score board
-                        Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.6),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Column(
-                              children: [
-                                Row(
-                                  spacing: 12,
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          matchController.team1Name.value,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 10,
-                                          ),
-                                        ),
-                                        Text(
-                                          '${matchController.team1Score.value}',
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 18,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Container(
-                                      width: 1,
-                                      height: 30,
-                                      color: Colors.white,
-                                    ),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          matchController.team2Name.value,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 10,
-                                          ),
-                                        ),
-                                        Text(
-                                          '${matchController.team2Score.value}',
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 18,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                      ],
-                    );
-                        }
+                        );
                       },
                     ),
                   ),
