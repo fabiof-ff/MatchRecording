@@ -28,26 +28,27 @@ class _WebCameraPreviewState extends State<WebCameraPreview> {
       _videoElement = html.VideoElement()
         ..autoplay = true
         ..muted = true  // Muto per non riprodurre l'audio del microfono
+        ..volume = 0.0  // Forza volume a zero
         ..style.width = '100%'
         ..style.height = '100%'
         ..style.objectFit = 'cover';
 
       // Richiedi accesso alla camera con constraints multipli per compatibilità
-      // Prova prima camera posteriore (environment), poi fallback
+      // Su iOS/Chrome usa solo 'ideal' perché 'exact' fallisce spesso
       final constraints = [
-        // Constraint 1: Camera posteriore con facingMode exact (iOS)
+        // Constraint 1: Camera posteriore con facingMode ideal
         {
           'video': {
-            'facingMode': {'exact': 'environment'},
+            'facingMode': {'ideal': 'environment'},
             'width': {'ideal': 1920},
             'height': {'ideal': 1080},
           },
           'audio': true,
         },
-        // Constraint 2: Camera posteriore con facingMode ideal (Android)
+        // Constraint 2: Camera posteriore semplice
         {
           'video': {
-            'facingMode': {'ideal': 'environment'},
+            'facingMode': 'environment',
             'width': {'ideal': 1920},
             'height': {'ideal': 1080},
           },
