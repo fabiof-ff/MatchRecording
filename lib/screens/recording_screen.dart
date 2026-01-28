@@ -167,8 +167,8 @@ class _RecordingScreenState extends State<RecordingScreen> {
                       if (isLandscape) {
                         // LAYOUT LANDSCAPE COMPLETO - SENZA ROTAZIONE
                         return Positioned(
-                          left: -100,
-                          top: 0, // Ricentrato
+                          left: 12,
+                          top: 12,
                           child: Transform.rotate(
                             angle: 0, // Nessuna rotazione
                             origin: const Offset(0, 0),
