@@ -137,10 +137,15 @@ class _RecordingScreenState extends State<RecordingScreen> {
                         : const SizedBox(),
                   ),
 
-                  // Live Overlay (cronometro e punteggio)
+                  // Live Overlay (cronometro e punteggio) - SOLO IN MODALITÀ ORIZZONTALE
                   Obx(
                     () {
                       final isLandscape = matchController.isOverlayLandscape.value;
+                      
+                      // Mostra overlay solo se in modalità orizzontale
+                      if (!isLandscape) {
+                        return const SizedBox.shrink(); // Nascondi completamente
+                      }
                       
                       if (isLandscape) {
                         // LAYOUT LANDSCAPE COMPLETO - SENZA ROTAZIONE

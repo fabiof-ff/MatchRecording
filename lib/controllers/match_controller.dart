@@ -92,9 +92,9 @@ class MatchController extends GetxController {
   }
 
   void _startTimer() {
-    _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      matchTime.value = Duration(milliseconds: matchTime.value.inMilliseconds + 100);
-      // Aggiorna l'overlay ad ogni tick per garantire sincronizzazione
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      matchTime.value = Duration(seconds: matchTime.value.inSeconds + 1);
+      // Aggiorna l'overlay ogni secondo
       _updateOverlay();
     });
   }
