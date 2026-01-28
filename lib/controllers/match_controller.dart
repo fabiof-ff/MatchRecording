@@ -18,6 +18,7 @@ class MatchController extends GetxController {
   final highlights = RxList<Highlight>([]);
   final recordedVideoPath = ''.obs;
   final isOverlayLandscape = true.obs; // Overlay sempre in orizzontale di default
+  final initialTimer = Duration.zero.obs; // Timer iniziale impostato dall'utente
 
   Timer? _timer;
   CameraRecordingController? _cameraController;
@@ -60,7 +61,7 @@ class MatchController extends GetxController {
 
   void startRecording() {
     isRecording.value = true;
-    matchTime.value = Duration.zero;
+    matchTime.value = initialTimer.value; // Inizia dal timer impostato
     
     // Inizializza l'overlay con i valori correnti
     _updateOverlay();

@@ -126,9 +126,9 @@ class _RecordingScreenState extends State<RecordingScreen> {
                   ),
 
                   // Live Overlay (cronometro e punteggio) - SOLO IN MODALITÀ ORIZZONTALE
-                  Obx(
-                    () {
-                      final isLandscape = matchController.isOverlayLandscape.value;
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
                       
                       // Mostra overlay solo se in modalità orizzontale
                       if (!isLandscape) {
@@ -197,11 +197,15 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text(
-                                          matchController.team1Name.value,
+                                          matchController.team1Name.value.length > 10
+                                            ? matchController.team1Name.value.substring(0, 10)
+                                            : matchController.team1Name.value,
                                           style: const TextStyle(
-                                            color: Colors.white70,
-                                            fontSize: 10,
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
                                           ),
+                                          textAlign: TextAlign.center,
                                         ),
                                         Row(
                                           mainAxisSize: MainAxisSize.min,
@@ -211,7 +215,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                               onTap: matchController.subtractGoalTeam1,
                                               child: Container(
                                                 padding: const EdgeInsets.all(2),
-                                                child: const Icon(Icons.remove_circle, color: Colors.blue, size: 16),
+                                                child: const Icon(Icons.remove_circle, color: Colors.blue, size: 28),
                                               ),
                                             ),
                                             Text(
@@ -219,14 +223,14 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 16,
+                                                fontSize: 24,
                                               ),
                                             ),
                                             InkWell(
                                               onTap: matchController.addGoalTeam1,
                                               child: Container(
                                                 padding: const EdgeInsets.all(2),
-                                                child: const Icon(Icons.add_circle, color: Colors.blue, size: 16),
+                                                child: const Icon(Icons.add_circle, color: Colors.blue, size: 28),
                                               ),
                                             ),
                                           ],
@@ -244,11 +248,15 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text(
-                                          matchController.team2Name.value,
+                                          matchController.team2Name.value.length > 10
+                                            ? matchController.team2Name.value.substring(0, 10)
+                                            : matchController.team2Name.value,
                                           style: const TextStyle(
-                                            color: Colors.white70,
-                                            fontSize: 10,
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
                                           ),
+                                          textAlign: TextAlign.center,
                                         ),
                                         Row(
                                           mainAxisSize: MainAxisSize.min,
@@ -258,7 +266,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                               onTap: matchController.subtractGoalTeam2,
                                               child: Container(
                                                 padding: const EdgeInsets.all(2),
-                                                child: const Icon(Icons.remove_circle, color: Colors.red, size: 16),
+                                                child: const Icon(Icons.remove_circle, color: Colors.red, size: 28),
                                               ),
                                             ),
                                             Text(
@@ -266,14 +274,14 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 16,
+                                                fontSize: 24,
                                               ),
                                             ),
                                             InkWell(
                                               onTap: matchController.addGoalTeam2,
                                               child: Container(
                                                 padding: const EdgeInsets.all(2),
-                                                child: const Icon(Icons.add_circle, color: Colors.red, size: 16),
+                                                child: const Icon(Icons.add_circle, color: Colors.red, size: 28),
                                               ),
                                             ),
                                           ],
