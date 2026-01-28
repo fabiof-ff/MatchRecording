@@ -208,7 +208,7 @@ class HomeScreen extends StatelessWidget {
         padding: const EdgeInsets.all(8),
         color: Colors.grey.shade100,
         child: Text(
-          'Ultimo deploy: 28/01/2026 - 20:52',
+          'Ultimo deploy: 28/01/2026 - 20:57',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 11,
