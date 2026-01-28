@@ -14,7 +14,6 @@ class RecordingScreen extends StatefulWidget {
 
 class _RecordingScreenState extends State<RecordingScreen> {
   late CameraRecordingController _cameraRecordingController;
-  Function()? _switchCameraCallback;
 
   @override
   void initState() {
@@ -73,9 +72,6 @@ class _RecordingScreenState extends State<RecordingScreen> {
                       // Camera preview - diverso per web e mobile
                       if (kIsWeb)
                         WebCameraPreview(
-                          onCameraReady: (switchCamera) {
-                            _switchCameraCallback = switchCamera;
-                          },
                           cameraController: _cameraRecordingController,
                         )
                       else
@@ -195,6 +191,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                     // Team 1 con controlli
                                     Column(
                                       mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         Text(
                                           matchController.team1Name.value.length > 10
@@ -209,6 +206,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                         ),
                                         Row(
                                           mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment: MainAxisAlignment.center,
                                           spacing: 4,
                                           children: [
                                             InkWell(
@@ -246,6 +244,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                     // Team 2 con controlli
                                     Column(
                                       mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         Text(
                                           matchController.team2Name.value.length > 10
@@ -260,6 +259,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                         ),
                                         Row(
                                           mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment: MainAxisAlignment.center,
                                           spacing: 4,
                                           children: [
                                             InkWell(
@@ -429,32 +429,6 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                         ),
                                       ),
                                     ),
-                                    
-                                    // Switch camera button
-                                    if (kIsWeb)
-                                      Material(
-                                        color: Colors.transparent,
-                                        child: InkWell(
-                                          onTap: () {
-                                            if (_switchCameraCallback != null) {
-                                              _switchCameraCallback!();
-                                            }
-                                          },
-                                          child: Container(
-                                            width: 50,
-                                            height: 50,
-                                            decoration: BoxDecoration(
-                                              color: Colors.black.withOpacity(0.7),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: const Icon(
-                                              Icons.flip_camera_ios,
-                                              color: Colors.white,
-                                              size: 24,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
                                     
                                     // Toggle half time button
                                     Material(
