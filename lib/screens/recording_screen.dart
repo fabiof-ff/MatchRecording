@@ -521,330 +521,37 @@ class _RecordingScreenState extends State<RecordingScreen> {
                           ),
                         );
                       } else {
-                        // LAYOUT VERTICALE - originale invariato
-                        return Stack(
-                          children: [
-                            Positioned(
-                              top: 16,
-                              left: 16,
-                              child: Column(
-                                spacing: 8,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Match time
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.6),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Row(
-                                      spacing: 4,
-                                      children: [
-                                        const Icon(Icons.schedule, color: Colors.white, size: 16),
-                                        Text(
-                                          matchController.formatMatchTime(matchController.matchTime.value),
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14,
-                                            fontFamily: 'monospace',
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-
-                                  // Score board
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.6),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        Row(
-                                          spacing: 12,
-                                          children: [
-                                            Column(
-                                              crossAxisAlignment: CrossAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  matchController.team1Name.value,
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 10,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  '${matchController.team1Score.value}',
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 18,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            Container(
-                                              width: 1,
-                                              height: 30,
-                                              color: Colors.white,
-                                            ),
-                                            Column(
-                                              crossAxisAlignment: CrossAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  matchController.team2Name.value,
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 10,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  '${matchController.team2Score.value}',
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 18,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
+                        // LAYOUT VERTICALE - Banner con messaggio
+                        return Center(
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 32),
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.8),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.orange, width: 2),
                             ),
-                            
-                            // Bottom controls per layout verticale
-                            Positioned(
-                              bottom: 0,
-                              left: 0,
-                              right: 0,
-                              child: Container(
-                                color: Colors.black.withOpacity(0.4),
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  spacing: 12,
-                                  children: [
-                                    // Score controls
-                                    Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: Colors.black.withOpacity(0.6),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Obx(
-                                        () => Row(
-                                          spacing: 12,
-                                          children: [
-                                            // Team 1
-                                            Expanded(
-                                              child: Column(
-                                                spacing: 4,
-                                                children: [
-                                                  Text(
-                                                    matchController.team1Name.value,
-                                                    style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 12,
-                                                    ),
-                                                  ),
-                                                  Row(
-                                                    mainAxisAlignment: MainAxisAlignment.center,
-                                                    spacing: 8,
-                                                    children: [
-                                                      IconButton(
-                                                        onPressed: matchController.subtractGoalTeam1,
-                                                        icon: const Icon(Icons.remove_circle, color: Colors.blue),
-                                                        iconSize: 24,
-                                                        padding: EdgeInsets.zero,
-                                                        constraints: const BoxConstraints(),
-                                                      ),
-                                                      Text(
-                                                        '${matchController.team1Score.value}',
-                                                        style: const TextStyle(
-                                                          color: Colors.white,
-                                                          fontWeight: FontWeight.bold,
-                                                          fontSize: 18,
-                                                        ),
-                                                      ),
-                                                      IconButton(
-                                                        onPressed: matchController.addGoalTeam1,
-                                                        icon: const Icon(Icons.add_circle, color: Colors.blue),
-                                                        iconSize: 24,
-                                                        padding: EdgeInsets.zero,
-                                                        constraints: const BoxConstraints(),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            // Team 2
-                                            Expanded(
-                                              child: Column(
-                                                spacing: 4,
-                                                children: [
-                                                  Text(
-                                                    matchController.team2Name.value,
-                                                    style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 12,
-                                                    ),
-                                                  ),
-                                                  Row(
-                                                    mainAxisAlignment: MainAxisAlignment.center,
-                                                    spacing: 8,
-                                                    children: [
-                                                      IconButton(
-                                                        onPressed: matchController.subtractGoalTeam2,
-                                                        icon: const Icon(Icons.remove_circle, color: Colors.red),
-                                                        iconSize: 24,
-                                                        padding: EdgeInsets.zero,
-                                                        constraints: const BoxConstraints(),
-                                                      ),
-                                                      Text(
-                                                        '${matchController.team2Score.value}',
-                                                        style: const TextStyle(
-                                                          color: Colors.white,
-                                                          fontWeight: FontWeight.bold,
-                                                          fontSize: 18,
-                                                        ),
-                                                      ),
-                                                      IconButton(
-                                                        onPressed: matchController.addGoalTeam2,
-                                                        icon: const Icon(Icons.add_circle, color: Colors.red),
-                                                        iconSize: 24,
-                                                        padding: EdgeInsets.zero,
-                                                        constraints: const BoxConstraints(),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-
-                                    // Action buttons
-                                    Row(
-                                      spacing: 12,
-                                      children: [
-                                        // Highlight button
-                                        Expanded(
-                                          child: ElevatedButton.icon(
-                                            onPressed: matchController.isRecording.value
-                                                ? matchController.markHighlight
-                                                : null,
-                                            icon: const Icon(Icons.star),
-                                            label: const Text('Highlight'),
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.amber,
-                                              foregroundColor: Colors.black,
-                                              disabledBackgroundColor: Colors.grey.shade300,
-                                            ),
-                                          ),
-                                        ),
-
-                                        // Record/Stop button
-                                        Expanded(
-                                          child: Obx(
-                                            () => ElevatedButton.icon(
-                                              onPressed: () async {
-                                                if (matchController.isRecording.value) {
-                                                  matchController.stopRecording();
-                                                  await _cameraRecordingController.stopVideoRecording();
-                                                } else {
-                                                  matchController.startRecording();
-                                                  await _cameraRecordingController.startVideoRecording();
-                                                }
-                                              },
-                                              icon: Icon(matchController.isRecording.value ? Icons.stop : Icons.circle),
-                                              label: Text(matchController.isRecording.value ? 'Stop' : 'Registra'),
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: matchController.isRecording.value ? Colors.red : Colors.green,
-                                                foregroundColor: Colors.white,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        
-                                        // Switch camera button (solo web)
-                                        if (kIsWeb)
-                                          IconButton(
-                                            onPressed: () {
-                                              print('🎥 Pulsante camera premuto. Callback: ${_switchCameraCallback != null ? "presente" : "null"}');
-                                              if (_switchCameraCallback != null) {
-                                                _switchCameraCallback!();
-                                              } else {
-                                                print('❌ Callback null!');
-                                              }
-                                            },
-                                            icon: const Icon(Icons.flip_camera_ios),
-                                            color: Colors.white,
-                                            style: IconButton.styleFrom(
-                                              backgroundColor: Colors.black.withOpacity(0.6),
-                                            ),
-                                            tooltip: 'Cambia camera',
-                                          ),
-                                      ],
-                                    ),
-
-                                    // Video saved info
-                                    Obx(
-                                      () => matchController.recordedVideoPath.value.isNotEmpty
-                                          ? Container(
-                                              margin: const EdgeInsets.only(top: 12),
-                                              padding: const EdgeInsets.all(12),
-                                              decoration: BoxDecoration(
-                                                color: Colors.green.withOpacity(0.2),
-                                                border: Border.all(color: Colors.green, width: 1),
-                                                borderRadius: BorderRadius.circular(8),
-                                              ),
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                      const Icon(Icons.check_circle, color: Colors.green, size: 20),
-                                                      const SizedBox(width: 8),
-                                                      const Text(
-                                                        'Video Salvato',
-                                                        style: TextStyle(
-                                                          color: Colors.green,
-                                                          fontWeight: FontWeight.bold,
-                                                          fontSize: 14,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  const SizedBox(height: 8),
-                                                  SelectableText(
-                                                    matchController.recordedVideoPath.value,
-                                                    style: const TextStyle(
-                                                      color: Colors.white70,
-                                                      fontSize: 12,
-                                                      fontFamily: 'monospace',
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            )
-                                          : const SizedBox(),
-                                    ),
-                                  ],
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.screen_rotation,
+                                  color: Colors.orange,
+                                  size: 64,
                                 ),
-                              ),
+                                const SizedBox(height: 16),
+                                const Text(
+                                  'Mettere il dispositivo in orizzontale\nper iniziare la registrazione',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         );
                       }
                     },
