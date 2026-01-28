@@ -81,6 +81,35 @@ class _RecordingScreenState extends State<RecordingScreen> {
                       else
                         CameraPreview(_cameraRecordingController.cameraController),
 
+                  // Pulsante back in alto a sinistra
+                  Positioned(
+                    top: 16,
+                    left: 16,
+                    child: SafeArea(
+                      child: Material(
+                        color: Colors.black.withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(30),
+                        child: InkWell(
+                          onTap: () {
+                            if (matchController.isRecording.value) {
+                              matchController.stopRecording();
+                            }
+                            Get.back();
+                          },
+                          borderRadius: BorderRadius.circular(30),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            child: const Icon(
+                              Icons.arrow_back,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
                   // Top recording indicator (solo in modalità verticale)
                   Obx(
                     () => !matchController.isOverlayLandscape.value
