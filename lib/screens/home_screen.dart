@@ -11,51 +11,12 @@ class HomeScreen extends StatelessWidget {
     final matchController = Get.put(MatchController());
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Match Recording'),
-        centerTitle: true,
-        elevation: 0,
-      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             spacing: 16,
             children: [
-              // Header
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.blue.shade400, Colors.blue.shade600],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Match Recording',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Registra e evidenzia i momenti salienti',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white.withOpacity(0.9),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
               // Overlay Settings
               Container(
                 padding: const EdgeInsets.all(16),
@@ -244,6 +205,18 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
             ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(8),
+        color: Colors.grey.shade100,
+        child: Text(
+          'Ultimo deploy: 28/01/2026 - 02:30',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.grey.shade600,
           ),
         ),
       ),

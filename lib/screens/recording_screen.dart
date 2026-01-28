@@ -56,18 +56,6 @@ class _RecordingScreenState extends State<RecordingScreen> {
         return true;
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Registrazione'),
-          leading: IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () {
-              if (matchController.isRecording.value) {
-                matchController.stopRecording();
-              }
-              Get.back();
-            },
-          ),
-        ),
         body: Obx(
           () {
             if (!_cameraRecordingController.isInitialized.value) {
