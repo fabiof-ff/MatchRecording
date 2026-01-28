@@ -17,6 +17,28 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             spacing: 16,
             children: [
+              // Banner nome app
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.red.shade700, Colors.red.shade500],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Center(
+                  child: Text(
+                    'Match Recording',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ),
+              ),
+
               // Overlay Settings
               Container(
                 padding: const EdgeInsets.all(16),
@@ -100,6 +122,31 @@ class HomeScreen extends StatelessWidget {
                           ),
                         )),
                       ],
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    // Timer iniziale
+                    const Text('Timer Iniziale (mm:ss)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 8),
+                    TextField(
+                      decoration: InputDecoration(
+                        hintText: '00:00',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      ),
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) {
+                        // Parse mm:ss format
+                        final parts = value.split(':');
+                        if (parts.length == 2) {
+                          final minutes = int.tryParse(parts[0]) ?? 0;
+                          final seconds = int.tryParse(parts[1]) ?? 0;
+                          matchController.initialTimer.value = Duration(minutes: minutes, seconds: seconds);
+                        }
+                      },
+                      controller: TextEditingController(
+                        text: '${matchController.initialTimer.value.inMinutes.toString().padLeft(2, '0')}:${(matchController.initialTimer.value.inSeconds % 60).toString().padLeft(2, '0')}',
+                      ),
                     ),
                   ],
                 ),
@@ -208,7 +255,7 @@ class HomeScreen extends StatelessWidget {
         padding: const EdgeInsets.all(8),
         color: Colors.grey.shade100,
         child: Text(
-          'Ultimo deploy: 28/01/2026 - 21:00',
+          'Ultimo deploy: 28/01/2026 - 21:14',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 11,
