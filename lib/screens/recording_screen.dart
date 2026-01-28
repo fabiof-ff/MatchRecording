@@ -448,30 +448,6 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                         ),
                                       ),
                                     
-                                    // Toggle orientation button
-                                    if (kIsWeb)
-                                      Material(
-                                        color: Colors.transparent,
-                                        child: InkWell(
-                                          onTap: () {
-                                            matchController.toggleOverlayOrientation();
-                                          },
-                                          child: Container(
-                                            width: 50,
-                                            height: 50,
-                                            decoration: BoxDecoration(
-                                              color: Colors.black.withOpacity(0.7),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: const Icon(
-                                              Icons.stay_current_portrait,
-                                              color: Colors.white,
-                                              size: 24,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    
                                     // Toggle half time button
                                     Material(
                                       color: Colors.transparent,
@@ -818,26 +794,6 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                               backgroundColor: Colors.black.withOpacity(0.6),
                                             ),
                                             tooltip: 'Cambia camera',
-                                          ),
-                                        
-                                        // Toggle overlay orientation button
-                                        if (kIsWeb)
-                                          Obx(
-                                            () => IconButton(
-                                              onPressed: () {
-                                                matchController.toggleOverlayOrientation();
-                                              },
-                                              icon: Icon(
-                                                matchController.isOverlayLandscape.value 
-                                                  ? Icons.stay_current_portrait 
-                                                  : Icons.stay_current_landscape,
-                                              ),
-                                              color: Colors.white,
-                                              style: IconButton.styleFrom(
-                                                backgroundColor: Colors.black.withOpacity(0.6),
-                                              ),
-                                              tooltip: 'Cambia orientamento overlay',
-                                            ),
                                           ),
                                       ],
                                     ),

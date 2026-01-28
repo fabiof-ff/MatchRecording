@@ -241,20 +241,8 @@ class WebVideoRecorder {
       _isRecording = true;
 
       print('🎥 Registrazione web avviata');
-      Get.snackbar(
-        'Registrazione Avviata',
-        'Il video sarà salvato automaticamente al termine',
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 3),
-      );
     } catch (e) {
       print('❌ Errore avvio registrazione web: $e');
-      Get.snackbar(
-        'Errore',
-        'Impossibile avviare la registrazione: $e',
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 4),
-      );
       rethrow;
     }
   }
@@ -297,22 +285,10 @@ class WebVideoRecorder {
         
         print('✅ Video salvato: $fileName');
         print('📊 Dimensione: $sizeMB MB');
-        
-        Get.snackbar(
-          'Video Salvato!',
-          'File: $fileName\nDimensione: $sizeMB MB\n\nIl browser dovrebbe aver avviato il download automaticamente.',
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 5),
-        );
 
         completer.complete(fileName);
       } catch (e) {
         print('❌ Errore nel salvataggio: $e');
-        Get.snackbar(
-          'Errore',
-          'Errore durante il salvataggio: $e',
-          backgroundColor: Colors.red,
-        );
         completer.completeError(e);
       }
     });

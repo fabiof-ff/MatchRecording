@@ -177,12 +177,6 @@ class HighlightsScreen extends StatelessWidget {
         ElevatedButton(
           onPressed: () {
             Get.back();
-            Get.snackbar(
-              'Successo',
-              'Highlights esportati in MP4',
-              backgroundColor: Colors.green,
-              colorText: Colors.white,
-            );
           },
           child: const Text('Scarica'),
         ),
@@ -203,7 +197,6 @@ class HighlightsScreen extends StatelessWidget {
           onPressed: () {
             controller.highlights.clear();
             Get.back();
-            Get.snackbar('Eliminati', 'Tutti gli highlights sono stati rimossi');
           },
           style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
           child: const Text('Elimina', style: TextStyle(color: Colors.white)),

@@ -27,14 +27,6 @@ class MatchController extends GetxController {
     print('✅ CameraRecordingController collegato al MatchController');
   }
   
-  void toggleOverlayOrientation() {
-    isOverlayLandscape.value = !isOverlayLandscape.value;
-    // Aggiorna immediatamente l'overlay
-    if (isRecording.value) {
-      _updateOverlay();
-    }
-  }
-  
   void toggleHalfTime() {
     halfTime.value = halfTime.value == '1° T' ? '2° T' : '1° T';
     // Aggiorna immediatamente l'overlay

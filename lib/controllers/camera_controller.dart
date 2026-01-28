@@ -151,20 +151,10 @@ class CameraRecordingController extends GetxController {
       }
 
       if (!cameraController.value.isInitialized) {
-        Get.snackbar(
-          'Errore',
-          'Camera non inizializzata',
-          backgroundColor: Colors.red,
-        );
         return;
       }
 
       if (isRecordingVideo.value) {
-        Get.snackbar(
-          'Attenzione',
-          'Registrazione già in corso',
-          backgroundColor: Colors.orange,
-        );
         return;
       }
 
@@ -191,19 +181,8 @@ class CameraRecordingController extends GetxController {
 
       print('🎥 Registrazione video avviata');
       print('📁 Salverà in: $filePath');
-      Get.snackbar(
-        'Registrazione Avviata',
-        'Il video sarà salvato in:\n$videosDir',
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 3),
-      );
     } catch (e) {
       print('❌ Errore nell\'avvio della registrazione: $e');
-      Get.snackbar(
-        'Errore',
-        'Errore nell\'avvio della registrazione: $e',
-        backgroundColor: Colors.red,
-      );
     }
   }
 
@@ -211,11 +190,6 @@ class CameraRecordingController extends GetxController {
   Future<String?> stopVideoRecording() async {
     try {
       if (!isRecordingVideo.value) {
-        Get.snackbar(
-          'Attenzione',
-          'Nessuna registrazione in corso',
-          backgroundColor: Colors.orange,
-        );
         return null;
       }
 
@@ -254,22 +228,10 @@ class CameraRecordingController extends GetxController {
       print('✅ Video salvato con successo!');
       print('📁 Percorso: ${videoPath.value}');
       print('📊 Dimensione: $fileSizeMB MB');
-      
-      Get.snackbar(
-        'Video Salvato!',
-        'Percorso: ${videoPath.value}\nDimensione: $fileSizeMB MB',
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 4),
-      );
 
       return videoPath.value;
     } catch (e) {
       print('❌ Errore nell\'arresto della registrazione: $e');
-      Get.snackbar(
-        'Errore',
-        'Errore nell\'arresto della registrazione: $e',
-        backgroundColor: Colors.red,
-      );
       return null;
     }
   }
