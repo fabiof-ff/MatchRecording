@@ -455,12 +455,6 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                         child: InkWell(
                                           onTap: () {
                                             matchController.toggleOverlayOrientation();
-                                            Get.snackbar(
-                                              'Orientamento',
-                                              'Verticale',
-                                              duration: const Duration(seconds: 1),
-                                              snackPosition: SnackPosition.TOP,
-                                            );
                                           },
                                           child: Container(
                                             width: 50,
@@ -831,14 +825,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                           Obx(
                                             () => IconButton(
                                               onPressed: () {
-                                                final currentOrientation = matchController.isOverlayLandscape.value;
                                                 matchController.toggleOverlayOrientation();
-                                                Get.snackbar(
-                                                  'Orientamento Overlay',
-                                                  currentOrientation ? 'Verticale' : 'Orizzontale',
-                                                  duration: const Duration(seconds: 1),
-                                                  snackPosition: SnackPosition.TOP,
-                                                );
                                               },
                                               icon: Icon(
                                                 matchController.isOverlayLandscape.value 

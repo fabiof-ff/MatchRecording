@@ -94,7 +94,7 @@ class HighlightsScreen extends StatelessWidget {
                           icon: const Icon(Icons.delete_outline),
                           onPressed: () {
                             matchController.highlights.removeAt(index);
-                            Get.snackbar('Eliminato', 'Highlight rimosso', duration: const Duration(seconds: 2));
+                            // Highlight rimosso
                           },
                         ),
                       ),

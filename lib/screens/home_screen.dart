@@ -189,11 +189,7 @@ class HomeScreen extends StatelessWidget {
                           ),
                         );
                       } catch (e) {
-                        Get.snackbar(
-                          'Info',
-                          'Camera non ancora inizializzata',
-                          backgroundColor: Colors.orange,
-                        );
+                        // Camera non ancora inizializzata
                       }
                     },
                     icon: const Icon(Icons.folder_outlined, size: 18),

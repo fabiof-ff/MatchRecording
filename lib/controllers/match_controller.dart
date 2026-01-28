@@ -123,24 +123,20 @@ class MatchController extends GetxController {
 
   void addGoalTeam1() {
     if (!isRecording.value) {
-      Get.snackbar('Errore', 'Registrazione non attiva', backgroundColor: Colors.red);
       return;
     }
     team1Score.value++;
     _updateOverlay();
     print('⚽ Gol ${team1Name.value}! Score: ${team1Score.value} - ${team2Score.value}');
-    Get.snackbar('Gol!', '${team1Name.value} segna!', backgroundColor: Colors.green);
   }
 
   void addGoalTeam2() {
     if (!isRecording.value) {
-      Get.snackbar('Errore', 'Registrazione non attiva', backgroundColor: Colors.red);
       return;
     }
     team2Score.value++;
     _updateOverlay();
     print('⚽ Gol ${team2Name.value}! Score: ${team1Score.value} - ${team2Score.value}');
-    Get.snackbar('Gol!', '${team2Name.value} segna!', backgroundColor: Colors.green);
   }
 
   void subtractGoalTeam1() {
@@ -159,7 +155,6 @@ class MatchController extends GetxController {
 
   void markHighlight() {
     if (!isRecording.value) {
-      Get.snackbar('Errore', 'Registrazione non attiva', backgroundColor: Colors.red);
       return;
     }
     final highlight = Highlight(
@@ -169,7 +164,6 @@ class MatchController extends GetxController {
     );
     highlights.add(highlight);
     print('⭐ Highlight marcato al ${highlight.formattedTime}');
-    Get.snackbar('Highlight!', 'Momento saliente registrato', backgroundColor: Colors.amber);
   }
 
   String formatMatchTime(Duration duration) {
