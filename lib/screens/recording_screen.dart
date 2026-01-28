@@ -81,35 +81,6 @@ class _RecordingScreenState extends State<RecordingScreen> {
                       else
                         CameraPreview(_cameraRecordingController.cameraController),
 
-                  // Pulsante back in alto a sinistra
-                  Positioned(
-                    top: 16,
-                    left: 16,
-                    child: SafeArea(
-                      child: Material(
-                        color: Colors.black.withOpacity(0.7),
-                        borderRadius: BorderRadius.circular(30),
-                        child: InkWell(
-                          onTap: () {
-                            if (matchController.isRecording.value) {
-                              matchController.stopRecording();
-                            }
-                            Get.back();
-                          },
-                          borderRadius: BorderRadius.circular(30),
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            child: const Icon(
-                              Icons.arrow_back,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-
                   // Top recording indicator (solo in modalità verticale)
                   Obx(
                     () => !matchController.isOverlayLandscape.value
@@ -221,46 +192,91 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                       height: 20,
                                       color: Colors.white.withOpacity(0.5),
                                     ),
-                                    // Squadre e punteggio
+                                    // Team 1 con controlli
                                     Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        // Nomi squadre
+                                        Text(
+                                          matchController.team1Name.value,
+                                          style: const TextStyle(
+                                            color: Colors.white70,
+                                            fontSize: 10,
+                                          ),
+                                        ),
                                         Row(
                                           mainAxisSize: MainAxisSize.min,
-                                          spacing: 6,
+                                          spacing: 4,
                                           children: [
-                                            Text(
-                                              matchController.team1Name.value,
-                                              style: const TextStyle(
-                                                color: Colors.white70,
-                                                fontSize: 10,
+                                            InkWell(
+                                              onTap: matchController.subtractGoalTeam1,
+                                              child: Container(
+                                                padding: const EdgeInsets.all(2),
+                                                child: const Icon(Icons.remove_circle, color: Colors.blue, size: 16),
                                               ),
                                             ),
                                             Text(
-                                              '-',
+                                              '${matchController.team1Score.value}',
                                               style: const TextStyle(
-                                                color: Colors.white70,
-                                                fontSize: 10,
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
                                               ),
                                             ),
-                                            Text(
-                                              matchController.team2Name.value,
-                                              style: const TextStyle(
-                                                color: Colors.white70,
-                                                fontSize: 10,
+                                            InkWell(
+                                              onTap: matchController.addGoalTeam1,
+                                              child: Container(
+                                                padding: const EdgeInsets.all(2),
+                                                child: const Icon(Icons.add_circle, color: Colors.blue, size: 16),
                                               ),
                                             ),
                                           ],
                                         ),
-                                        // Punteggio
+                                      ],
+                                    ),
+                                    // Separatore
+                                    Container(
+                                      width: 1,
+                                      height: 20,
+                                      color: Colors.white.withOpacity(0.5),
+                                    ),
+                                    // Team 2 con controlli
+                                    Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
                                         Text(
-                                          '${matchController.team1Score.value}-${matchController.team2Score.value}',
+                                          matchController.team2Name.value,
                                           style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
+                                            color: Colors.white70,
+                                            fontSize: 10,
                                           ),
+                                        ),
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          spacing: 4,
+                                          children: [
+                                            InkWell(
+                                              onTap: matchController.subtractGoalTeam2,
+                                              child: Container(
+                                                padding: const EdgeInsets.all(2),
+                                                child: const Icon(Icons.remove_circle, color: Colors.red, size: 16),
+                                              ),
+                                            ),
+                                            Text(
+                                              '${matchController.team2Score.value}',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                            InkWell(
+                                              onTap: matchController.addGoalTeam2,
+                                              child: Container(
+                                                padding: const EdgeInsets.all(2),
+                                                child: const Icon(Icons.add_circle, color: Colors.red, size: 16),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
@@ -318,6 +334,32 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                   mainAxisSize: MainAxisSize.min,
                                   spacing: 12,
                                   children: [
+                                    // Back button
+                                    Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        onTap: () {
+                                          if (matchController.isRecording.value) {
+                                            matchController.stopRecording();
+                                          }
+                                          Get.back();
+                                        },
+                                        child: Container(
+                                          width: 50,
+                                          height: 50,
+                                          decoration: BoxDecoration(
+                                            color: Colors.black.withOpacity(0.7),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.arrow_back,
+                                            color: Colors.white,
+                                            size: 24,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    
                                     // Highlight button
                                     Obx(
                                       () => Material(
@@ -464,90 +506,6 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                       ),
                                     ),
                                   ],
-                                ),
-                              ),
-                            ),
-                            
-                            // 4. Score controls compatti in basso
-                            Positioned(
-                              bottom: 12,
-                              left: 12,
-                              right: 80,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.7),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Obx(
-                                  () => Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    spacing: 24,
-                                    children: [
-                                      // Team 1
-                                      Row(
-                                        spacing: 8,
-                                        children: [
-                                          IconButton(
-                                            onPressed: matchController.subtractGoalTeam1,
-                                            icon: const Icon(Icons.remove_circle, color: Colors.blue),
-                                            iconSize: 20,
-                                            padding: EdgeInsets.zero,
-                                            constraints: const BoxConstraints(),
-                                          ),
-                                          Text(
-                                            '${matchController.team1Score.value}',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 18,
-                                            ),
-                                          ),
-                                          IconButton(
-                                            onPressed: matchController.addGoalTeam1,
-                                            icon: const Icon(Icons.add_circle, color: Colors.blue),
-                                            iconSize: 20,
-                                            padding: EdgeInsets.zero,
-                                            constraints: const BoxConstraints(),
-                                          ),
-                                        ],
-                                      ),
-                                      // Separatore
-                                      Container(
-                                        width: 2,
-                                        height: 24,
-                                        color: Colors.white.withOpacity(0.5),
-                                      ),
-                                      // Team 2
-                                      Row(
-                                        spacing: 8,
-                                        children: [
-                                          IconButton(
-                                            onPressed: matchController.subtractGoalTeam2,
-                                            icon: const Icon(Icons.remove_circle, color: Colors.red),
-                                            iconSize: 20,
-                                            padding: EdgeInsets.zero,
-                                            constraints: const BoxConstraints(),
-                                          ),
-                                          Text(
-                                            '${matchController.team2Score.value}',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 18,
-                                            ),
-                                          ),
-                                          IconButton(
-                                            onPressed: matchController.addGoalTeam2,
-                                            icon: const Icon(Icons.add_circle, color: Colors.red),
-                                            iconSize: 20,
-                                            padding: EdgeInsets.zero,
-                                            constraints: const BoxConstraints(),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
                                 ),
                               ),
                             ),
