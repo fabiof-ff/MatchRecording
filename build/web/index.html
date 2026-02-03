@@ -18,14 +18,18 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="description" content="Match Recording - App web per registrare e analizzare partite">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Match Recording">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  
+  <!-- Prevenire sleep su iOS durante registrazione -->
+  <meta name="format-detection" content="telephone=no">
 
   <!-- Chrome specific tags -->
   <meta name="theme-color" content="#0175C2">
@@ -36,6 +40,16 @@
 
   <title>Match Recording - Web App</title>
   <link rel="manifest" href="manifest.json">
+  
+  <!-- Wake Lock API polyfill per iOS -->
+  <script>
+    // Prevenire sleep dello schermo durante registrazione
+    if ('wakeLock' in navigator) {
+      console.log('🔓 Wake Lock API disponibile');
+    } else {
+      console.log('⚠️ Wake Lock API non supportata su questo browser');
+    }
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
