@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:html' as html;
+import 'dart:js' as js;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -9,9 +10,12 @@ class WebVideoRecorder {
   html.MediaStream? _canvasStream;
   html.MediaRecorder? _mediaRecorder;
   final List<html.Blob> _recordedChunks = [];
+  final List<html.Blob> _allVideoSegments = []; // Per salvare segmenti multipli
   bool _isRecording = false;
   bool _isPausedBySystem = false; // Flag per pausa da sistema
   bool _isSavingPartialVideo = false; // Flag per evitare salvataggi multipli
+  Timer? _memoryCleanupTimer; // Timer per pulizia periodica memoria
+  int _segmentCount = 0; // Contatore segmenti video
   
   html.CanvasElement? _canvas;
   html.VideoElement? _videoElement;
@@ -194,8 +198,8 @@ class WebVideoRecorder {
         _canvasStream!.addTrack(audioTracks.first);
       }
 
-      // Disegna frame con overlay ripetutamente (30 FPS)
-      _drawTimer = Timer.periodic(const Duration(milliseconds: 33), (_) {
+      // Disegna frame con overlay ripetutamente (15 FPS - ottimizzato per iOS)
+      _drawTimer = Timer.periodic(const Duration(milliseconds: 67), (_) {
         if (_canvas == null || _videoElement == null || ctx == null) return;
         
         // Verifica che il video sia in riproduzione
@@ -237,18 +241,26 @@ class WebVideoRecorder {
       });
 
       _recordedChunks.clear();
+      _allVideoSegments.clear();
+      _segmentCount = 0;
 
       // Ascolta i dati registrati
       _mediaRecorder!.addEventListener('dataavailable', (event) {
         final blobEvent = event as html.BlobEvent;
         if (blobEvent.data != null && blobEvent.data!.size > 0) {
           _recordedChunks.add(blobEvent.data!);
+          final sizeMB = blobEvent.data!.size / (1024 * 1024);
+          print('📦 Chunk ricevuto: ${sizeMB.toStringAsFixed(2)} MB - Totale chunks: ${_recordedChunks.length}');
         }
       });
 
-      // Avvia la registrazione
-      _mediaRecorder!.start();
+      // Avvia la registrazione con timeslice di 10 secondi per iOS
+      // Questo genera chunk ogni 10s invece di accumulare tutto in memoria
+      _mediaRecorder!.start(10000); // 10000ms = 10 secondi
       _isRecording = true;
+      
+      // Avvia timer di pulizia memoria ogni 30 secondi
+      _startMemoryCleanup();
 
       print('🎥 Registrazione web avviata');
     } catch (e) {
@@ -268,8 +280,12 @@ class WebVideoRecorder {
     // Ascolta l'evento di stop
     _mediaRecorder!.addEventListener('stop', (event) {
       try {
+        // Combina tutti i segmenti consolidati + chunk rimanenti
+        final List<html.Blob> allBlobs = [..._allVideoSegments, ..._recordedChunks];
+        print('📦 Creazione video finale da ${allBlobs.length} segmenti/chunks');
+        
         // Crea un blob dal video registrato con il tipo corretto
-        final blob = html.Blob(_recordedChunks, _mimeType);
+        final blob = html.Blob(allBlobs, _mimeType);
         
         // Crea nome file con timestamp ed estensione corretta
         final timestamp = DateTime.now();
@@ -310,6 +326,10 @@ class WebVideoRecorder {
     // Ferma il timer di disegno
     _drawTimer?.cancel();
     _drawTimer = null;
+    
+    // Ferma il timer di cleanup memoria
+    _memoryCleanupTimer?.cancel();
+    _memoryCleanupTimer = null;
 
     // Ferma tutti i track degli stream
     _cameraStream?.getTracks().forEach((track) {
@@ -509,145 +529,87 @@ class WebVideoRecorder {
   
   /// Verifica se è in pausa per motivi di sistema
   bool get isPausedBySystem => _isPausedBySystem;
-
-  /// Setup listener per visibilità pagina (interruzioni)
-  void _setupVisibilityListener() {
-    html.document.onVisibilityChange.listen((event) {
-      if (html.document.hidden ?? false) {
-        // Pagina nascosta (popup, notifica, cambio app, etc.)
-        _handlePageHidden();
-      } else {
-        // Pagina tornata visibile
-        _handlePageVisible();
+  
+  /// Avvia timer di pulizia periodica memoria (ogni 30 secondi)
+  void _startMemoryCleanup() {
+    _memoryCleanupTimer?.cancel();
+    _memoryCleanupTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (!_isRecording || _recordedChunks.isEmpty) return;
+      
+      final chunksCount = _recordedChunks.length;
+      final totalSize = _recordedChunks.fold<int>(0, (sum, blob) => sum + blob.size);
+      final sizeMB = totalSize / (1024 * 1024);
+      
+      print('🧹 Pulizia memoria - Chunks: $chunksCount, Dimensione: ${sizeMB.toStringAsFixed(2)} MB');
+      
+      // Se ci sono più di 60 chunk (circa 10 minuti di registrazione a 10s/chunk)
+      // consolida i chunk in un blob unico e pulisci
+      if (chunksCount > 60) {
+        print('⚠️ Troppi chunk in memoria, consolido...');
+        _consolidateChunks();
       }
     });
-    
-    print('👁️ Listener visibilità pagina attivato');
   }
   
-  /// Gestisce quando la pagina viene nascosta
-  void _handlePageHidden() {
-    if (!_isRecording || _isPausedBySystem || _isSavingPartialVideo) return;
-    
-    print('⚠️ App in background - fermo e salvo registrazione...');
-    _isPausedBySystem = true;
-    _isSavingPartialVideo = true;
-    
-    // Ferma completamente la registrazione e salva
-    _stopAndSaveOnBackground();
-    
-    // Notifica il controller
-    onSystemPause?.call();
-  }
-  
-  /// Gestisce quando la pagina torna visibile
-  void _handlePageVisible() {
-    if (!_isPausedBySystem) return;
-    
-    print('✅ App tornata in foreground');
-    _isPausedBySystem = false;
-    
-    // Mostra messaggio all'utente
-    Get.snackbar(
-      '⚠️ Registrazione Interrotta',
-      'La registrazione è stata fermata e salvata a causa dell\'interruzione',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: Colors.red,
-      colorText: Colors.white,
-      duration: Duration(seconds: 5),
-    );
-    
-    // Notifica il controller che l'app è tornata
-    onSystemResume?.call();
-  }
-  
-  /// Ferma e salva la registrazione quando l'app va in background
-  void _stopAndSaveOnBackground() async {
-    if (!_isRecording || _mediaRecorder == null) {
-      _isSavingPartialVideo = false;
-      return;
-    }
+  /// Consolida i chunk esistenti in un unico blob per liberare memoria
+  void _consolidateChunks() {
+    if (_recordedChunks.isEmpty) return;
     
     try {
-      print('⏹️ Fermo MediaRecorder...');
+      // Crea un blob consolidato con tutti i chunk attuali
+      final consolidatedBlob = html.Blob(_recordedChunks, _mimeType);
+      _allVideoSegments.add(consolidatedBlob);
+      _segmentCount++;
       
-      // Setup listener per il save automatico
-      final completer = Completer<void>();
+      final sizeMB = consolidatedBlob.size / (1024 * 1024);
+      print('✅ Segmento #$_segmentCount consolidato: ${sizeMB.toStringAsFixed(2)} MB');
       
-      _mediaRecorder!.addEventListener('stop', (event) {
-        try {
-          if (_recordedChunks.isEmpty) {
-            print('⚠️ Nessun dato registrato');
-            completer.complete();
-            return;
-          }
-          
-          // Crea blob dal video
-          final blob = html.Blob(_recordedChunks, _mimeType);
-          final timestamp = DateTime.now();
-          final fileName = 'match_interrupted_${timestamp.year}${timestamp.month.toString().padLeft(2, '0')}${timestamp.day.toString().padLeft(2, '0')}_${timestamp.hour.toString().padLeft(2, '0')}${timestamp.minute.toString().padLeft(2, '0')}.$_fileExtension';
-          
-          // Crea URL e download
-          final url = html.Url.createObjectUrlFromBlob(blob);
-          final anchor = html.AnchorElement(href: url)
-            ..setAttribute('download', fileName)
-            ..style.display = 'none';
-          
-          html.document.body?.append(anchor);
-          anchor.click();
-          anchor.remove();
-          html.Url.revokeObjectUrl(url);
-          
-          final size = (blob.size / 1024 / 1024).toStringAsFixed(2);
-          print('💾 Video salvato automaticamente: $fileName');
-          print('📊 Dimensione: $size MB');
-          
-          // Notifica callback
-          onAutoSave?.call(fileName);
-          
-          // Mostra snackbar
-          Get.snackbar(
-            '💾 Video Salvato',
-            'Registrazione salvata: $fileName ($size MB)',
-            snackPosition: SnackPosition.TOP,
-            backgroundColor: Colors.orange,
-            colorText: Colors.white,
-            duration: Duration(seconds: 5),
-          );
-          
-          completer.complete();
-        } catch (e) {
-          print('❌ Errore nel salvataggio: $e');
-          completer.completeError(e);
-        }
-      });
+      // Pulisci i chunk dalla memoria
+      _recordedChunks.clear();
       
-      // Ferma la registrazione
-      _mediaRecorder!.stop();
-      _isRecording = false;
-      
-      // Ferma il timer di disegno
-      _drawTimer?.cancel();
-      _drawTimer = null;
-      
-      // Ferma gli stream
-      _cameraStream?.getTracks().forEach((track) => track.stop());
-      _canvasStream?.getTracks().forEach((track) => track.stop());
-      
-      // Aspetta che il salvataggio sia completato
-      await completer.future.timeout(
-        Duration(seconds: 5),
-        onTimeout: () {
-          print('⚠️ Timeout salvataggio automatico');
-        },
-      );
-      
+      // Forza garbage collection (suggerimento al browser)
+      print('🗑️ Memoria liberata');
     } catch (e) {
-      print('❌ Errore stop e salvataggio: $e');
-    } finally {
-      _isSavingPartialVideo = false;
+      print('❌ Errore consolidamento chunk: $e');
     }
   }
+
+  /// Setup listener per visibilità pagina (interruzioni)
+  /// DISABILITATO: Su iOS causava richiesta permessi camera al ritorno
+  void _setupVisibilityListener() {
+    // NON gestiamo più la visibilità perché:
+    // 1. iOS revoca i permessi camera se fermiamo lo stream
+    // 2. MediaRecorder continua anche in background
+    // 3. Wake Lock (se disponibile) previene il lock dello schermo
+    
+    // Tentiamo di acquisire Wake Lock per prevenire sleep
+    _requestWakeLock();
+    
+    print('👁️ Listener visibilità DISABILITATO (fix iOS)');
+  }
+  
+  /// Richiede Wake Lock per prevenire sleep dello schermo durante registrazione
+  void _requestWakeLock() {
+    try {
+      // Wake Lock API (disponibile su browser moderni)
+      final navigator = html.window.navigator;
+      if (navigator.toString().contains('wakeLock')) {
+        // @ts-ignore - API non ancora in dart:html
+        final wakeLock = js.context.callMethod('eval', ['navigator.wakeLock']);
+        if (wakeLock != null) {
+          js.context.callMethod('eval', [
+            'navigator.wakeLock.request("screen").then(() => console.log("🔒 Wake Lock attivato")).catch(e => console.log("⚠️ Wake Lock non disponibile:", e))'
+          ]);
+        }
+      }
+    } catch (e) {
+      print('⚠️ Wake Lock non supportato: $e');
+    }
+  }
+  
+  // Metodi di gestione background RIMOSSI
+  // La registrazione continua anche se l'app va in background
+  // iOS potrebbe mettere in pausa automaticamente, ma lo stream non viene fermato
 
   /// Cleanup
   void dispose() {
@@ -655,6 +617,7 @@ class WebVideoRecorder {
       _mediaRecorder?.stop();
     }
     _drawTimer?.cancel();
+    _memoryCleanupTimer?.cancel();
     _cameraStream?.getTracks().forEach((track) {
       track.stop();
     });
@@ -662,5 +625,6 @@ class WebVideoRecorder {
       track.stop();
     });
     _recordedChunks.clear();
+    _allVideoSegments.clear();
   }
 }
