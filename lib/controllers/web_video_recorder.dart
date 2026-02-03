@@ -10,6 +10,8 @@ class WebVideoRecorder {
   html.MediaRecorder? _mediaRecorder;
   final List<html.Blob> _recordedChunks = [];
   bool _isRecording = false;
+  bool _isPausedBySystem = false; // Flag per pausa da sistema
+  bool _isSavingPartialVideo = false; // Flag per evitare salvataggi multipli
   
   html.CanvasElement? _canvas;
   html.VideoElement? _videoElement;
@@ -17,6 +19,11 @@ class WebVideoRecorder {
   int _frameCount = 0;
   String _mimeType = 'video/webm;codecs=vp9';
   String _fileExtension = 'webm';
+  
+  // Callback per notificare pausa/ripresa
+  Function()? onSystemPause;
+  Function()? onSystemResume;
+  Function(String videoPath)? onAutoSave;
   
   // Dati overlay
   String team1Name = 'Squadra 1';
@@ -72,6 +79,9 @@ class WebVideoRecorder {
   /// Avvia la registrazione video web con overlay
   Future<void> startRecording() async {
     try {
+      // Setup listener per visibilità pagina
+      _setupVisibilityListener();
+      
       // Prova constraint multipli in ordine di preferenza per massima compatibilità
       print('📹 Tentativo di accesso alla camera...');
       
@@ -496,6 +506,148 @@ class WebVideoRecorder {
 
   /// Verifica se è in registrazione
   bool get isRecording => _isRecording;
+  
+  /// Verifica se è in pausa per motivi di sistema
+  bool get isPausedBySystem => _isPausedBySystem;
+
+  /// Setup listener per visibilità pagina (interruzioni)
+  void _setupVisibilityListener() {
+    html.document.onVisibilityChange.listen((event) {
+      if (html.document.hidden ?? false) {
+        // Pagina nascosta (popup, notifica, cambio app, etc.)
+        _handlePageHidden();
+      } else {
+        // Pagina tornata visibile
+        _handlePageVisible();
+      }
+    });
+    
+    print('👁️ Listener visibilità pagina attivato');
+  }
+  
+  /// Gestisce quando la pagina viene nascosta
+  void _handlePageHidden() {
+    if (!_isRecording || _isPausedBySystem || _isSavingPartialVideo) return;
+    
+    print('⚠️ App in background - fermo e salvo registrazione...');
+    _isPausedBySystem = true;
+    _isSavingPartialVideo = true;
+    
+    // Ferma completamente la registrazione e salva
+    _stopAndSaveOnBackground();
+    
+    // Notifica il controller
+    onSystemPause?.call();
+  }
+  
+  /// Gestisce quando la pagina torna visibile
+  void _handlePageVisible() {
+    if (!_isPausedBySystem) return;
+    
+    print('✅ App tornata in foreground');
+    _isPausedBySystem = false;
+    
+    // Mostra messaggio all'utente
+    Get.snackbar(
+      '⚠️ Registrazione Interrotta',
+      'La registrazione è stata fermata e salvata a causa dell\'interruzione',
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+      duration: Duration(seconds: 5),
+    );
+    
+    // Notifica il controller che l'app è tornata
+    onSystemResume?.call();
+  }
+  
+  /// Ferma e salva la registrazione quando l'app va in background
+  void _stopAndSaveOnBackground() async {
+    if (!_isRecording || _mediaRecorder == null) {
+      _isSavingPartialVideo = false;
+      return;
+    }
+    
+    try {
+      print('⏹️ Fermo MediaRecorder...');
+      
+      // Setup listener per il save automatico
+      final completer = Completer<void>();
+      
+      _mediaRecorder!.addEventListener('stop', (event) {
+        try {
+          if (_recordedChunks.isEmpty) {
+            print('⚠️ Nessun dato registrato');
+            completer.complete();
+            return;
+          }
+          
+          // Crea blob dal video
+          final blob = html.Blob(_recordedChunks, _mimeType);
+          final timestamp = DateTime.now();
+          final fileName = 'match_interrupted_${timestamp.year}${timestamp.month.toString().padLeft(2, '0')}${timestamp.day.toString().padLeft(2, '0')}_${timestamp.hour.toString().padLeft(2, '0')}${timestamp.minute.toString().padLeft(2, '0')}.$_fileExtension';
+          
+          // Crea URL e download
+          final url = html.Url.createObjectUrlFromBlob(blob);
+          final anchor = html.AnchorElement(href: url)
+            ..setAttribute('download', fileName)
+            ..style.display = 'none';
+          
+          html.document.body?.append(anchor);
+          anchor.click();
+          anchor.remove();
+          html.Url.revokeObjectUrl(url);
+          
+          final size = (blob.size / 1024 / 1024).toStringAsFixed(2);
+          print('💾 Video salvato automaticamente: $fileName');
+          print('📊 Dimensione: $size MB');
+          
+          // Notifica callback
+          onAutoSave?.call(fileName);
+          
+          // Mostra snackbar
+          Get.snackbar(
+            '💾 Video Salvato',
+            'Registrazione salvata: $fileName ($size MB)',
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: Colors.orange,
+            colorText: Colors.white,
+            duration: Duration(seconds: 5),
+          );
+          
+          completer.complete();
+        } catch (e) {
+          print('❌ Errore nel salvataggio: $e');
+          completer.completeError(e);
+        }
+      });
+      
+      // Ferma la registrazione
+      _mediaRecorder!.stop();
+      _isRecording = false;
+      
+      // Ferma il timer di disegno
+      _drawTimer?.cancel();
+      _drawTimer = null;
+      
+      // Ferma gli stream
+      _cameraStream?.getTracks().forEach((track) => track.stop());
+      _canvasStream?.getTracks().forEach((track) => track.stop());
+      
+      // Aspetta che il salvataggio sia completato
+      await completer.future.timeout(
+        Duration(seconds: 5),
+        onTimeout: () {
+          print('⚠️ Timeout salvataggio automatico');
+        },
+      );
+      
+    } catch (e) {
+      print('❌ Errore stop e salvataggio: $e');
+    } finally {
+      _isSavingPartialVideo = false;
+    }
+  }
 
   /// Cleanup
   void dispose() {
