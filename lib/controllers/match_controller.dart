@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import '../models/highlight.dart';
 import 'camera_controller.dart';
 
@@ -208,6 +210,58 @@ Risultato: $result
 ⭐ Highlights: ${highlights.length}
 📹 Durata highlights: $totalHighlightsDuration
     ''';
+  }
+
+  /// Esporta gli highlights in un file TXT
+  void exportHighlightsToTxt() {
+    if (highlights.isEmpty) {
+      Get.snackbar(
+        'Nessun Highlight',
+        'Non ci sono highlights da esportare',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    // Crea il contenuto del file
+    final buffer = StringBuffer();
+    buffer.writeln('HIGHLIGHTS - ${team1Name.value} vs ${team2Name.value}');
+    buffer.writeln('Data: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}');
+    buffer.writeln('Score: ${team1Score.value} - ${team2Score.value}');
+    buffer.writeln('Durata partita: ${formatMatchTime(matchTime.value)}');
+    buffer.writeln('');
+    buffer.writeln('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    buffer.writeln('');
+    buffer.writeln('TIMESTAMP HIGHLIGHTS:');
+    buffer.writeln('');
+    
+    for (int i = 0; i < highlights.length; i++) {
+      final highlight = highlights[i];
+      buffer.writeln('${i + 1}. Tempo: ${highlight.formattedTime}');
+    }
+    
+    buffer.writeln('');
+    buffer.writeln('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    buffer.writeln('Totale highlights: ${highlights.length}');
+
+    // Crea il blob e scarica il file
+    final content = buffer.toString();
+    final bytes = html.Blob([content]);
+    final url = html.Url.createObjectUrlFromBlob(bytes);
+    final anchor = html.AnchorElement(href: url)
+      ..setAttribute('download', 'highlights_${DateFormat('yyyyMMdd_HHmm').format(DateTime.now())}.txt')
+      ..click();
+    html.Url.revokeObjectUrl(url);
+
+    Get.snackbar(
+      'Esportazione Completata',
+      'File highlights.txt scaricato con successo',
+      backgroundColor: Colors.green,
+      colorText: Colors.white,
+    );
+    
+    print('📄 Highlights esportati in TXT: ${highlights.length} elementi');
   }
 
   @override

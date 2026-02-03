@@ -112,9 +112,9 @@ class HighlightsScreen extends StatelessWidget {
                   spacing: 12,
                   children: [
                     ElevatedButton.icon(
-                      onPressed: () => _showExportDialog(context, matchController),
+                      onPressed: () => matchController.exportHighlightsToTxt(),
                       icon: const Icon(Icons.file_download),
-                      label: const Text('Esporta Highlights (MP4)'),
+                      label: const Text('Esporta Timestamps (TXT)'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
                         foregroundColor: Colors.white,
@@ -138,49 +138,6 @@ class HighlightsScreen extends StatelessWidget {
           );
         },
       ),
-    );
-  }
-
-  void _showExportDialog(BuildContext context, MatchController controller) {
-    Get.defaultDialog(
-      title: 'Esporta Highlights',
-      content: Column(
-        children: [
-          const Icon(Icons.info_outline, size: 32, color: Colors.blue),
-          const SizedBox(height: 16),
-          Text(
-            'Highlights: ${controller.highlights.length}',
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Obx(
-            () => Text(
-              'Durata totale: ${controller.formatMatchTime(controller.getTotalHighlightsDuration())}',
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: 16),
-          const LinearProgressIndicator(),
-          const SizedBox(height: 8),
-          const Text(
-            'File MP4 pronto per il download',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, color: Colors.grey),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Get.back(),
-          child: const Text('Annulla'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            Get.back();
-          },
-          child: const Text('Scarica'),
-        ),
-      ],
     );
   }
 
