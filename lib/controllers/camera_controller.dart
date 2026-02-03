@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'dart:html' as html;
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:async';
@@ -20,9 +21,11 @@ class CameraRecordingController extends GetxController {
   final isWebPlatform = false.obs;
   final useWebSimulation = false.obs;
   final videosSaveDirectory = ''.obs;
+  final zoomLevel = 1.0.obs;
   
   // Web video recorder
   WebVideoRecorder? _webRecorder;
+  html.VideoElement? _videoElement;
   
   @override
   void onInit() {
@@ -52,6 +55,31 @@ class CameraRecordingController extends GetxController {
   /// Ottiene il percorso della directory dove vengono salvati i video
   String getVideoSaveDirectory() {
     return videosSaveDirectory.value;
+  }
+
+  /// Imposta il livello di zoom (solo per web)
+  void setZoom(double zoom) {
+    if (kIsWeb) {
+      zoomLevel.value = zoom.clamp(1.0, 3.0);
+      
+      // Applica lo zoom al video element
+      final videoElements = html.document.querySelectorAll('video');
+      if (videoElements.isNotEmpty) {
+        final video = videoElements.first as html.VideoElement;
+        video.style.transform = 'scale(${zoomLevel.value})';
+        print('🔍 Zoom impostato a: ${zoomLevel.value.toStringAsFixed(1)}x');
+      }
+    }
+  }
+
+  /// Aumenta lo zoom di 0.25x
+  void zoomIn() {
+    setZoom(zoomLevel.value + 0.25);
+  }
+
+  /// Diminuisce lo zoom di 0.25x
+  void zoomOut() {
+    setZoom(zoomLevel.value - 0.25);
   }
   
   /// Aggiorna lo stream della camera (per switch camera)

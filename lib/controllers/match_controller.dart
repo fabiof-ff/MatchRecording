@@ -7,6 +7,7 @@ import 'camera_controller.dart';
 class MatchController extends GetxController {
   // Match data
   final isRecording = false.obs;
+  final isTimerPaused = false.obs;
   final matchTime = Duration.zero.obs;
   final team1Score = 0.obs;
   final team2Score = 0.obs;
@@ -84,10 +85,17 @@ class MatchController extends GetxController {
 
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      matchTime.value = Duration(seconds: matchTime.value.inSeconds + 1);
-      // Aggiorna l'overlay ogni secondo
-      _updateOverlay();
+      if (!isTimerPaused.value) {
+        matchTime.value = Duration(seconds: matchTime.value.inSeconds + 1);
+        // Aggiorna l'overlay ogni secondo
+        _updateOverlay();
+      }
     });
+  }
+
+  void toggleTimerPause() {
+    isTimerPaused.value = !isTimerPaused.value;
+    print('⏯️ Timer ${isTimerPaused.value ? "in pausa" : "ripreso"}');
   }
 
   Future<void> _startVideoRecording() async {
