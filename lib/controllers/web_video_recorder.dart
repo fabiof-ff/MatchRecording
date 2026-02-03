@@ -342,16 +342,10 @@ class WebVideoRecorder {
       ctx.font = '600 11px Arial';
       final team1NameText = team1Name.length > 10 ? team1Name.substring(0, 10) : team1Name;
       final team2NameText = team2Name.length > 10 ? team2Name.substring(0, 10) : team2Name;
-      final team1NameWidth = ctx.measureText(team1NameText).width!.toDouble();
-      final team2NameWidth = ctx.measureText(team2NameText).width!.toDouble();
-      ctx.font = 'bold 11px Arial';
-      final scoreWidth = ctx.measureText('${team1Score}').width!.toDouble() + ctx.measureText('${team2Score}').width!.toDouble();
       
-      final boxWidth = padding + 12 + spacing + timerWidth + halfTimeWidth + spacing + // Timer section
-                       1 + spacing + // Separatore 1
-                       team1NameWidth.clamp(0, 60) + spacing + scoreWidth + spacing + // Team 1
-                       1 + spacing + // Separatore 2
-                       team2NameWidth.clamp(0, 60) + spacing + scoreWidth + padding; // Team 2
+      final boxWidth = padding + timerWidth + spacing + halfTimeWidth + spacing + 8 + // Timer section
+                       3 + 6 + 60 + spacing + 8 + // Team 1 (rettangolo + nome + punteggio)
+                       3 + 6 + 60 + padding; // Team 2 (rettangolo + nome + punteggio)
       final boxHeight = padding * 2 + 30;
       
       // Disegna box background
@@ -362,58 +356,54 @@ class WebVideoRecorder {
       var currentX = boxX + padding;
       final centerY = boxY + boxHeight / 2;
       
-      // 1. Icona timer
+      // 1. Timer
       ctx.fillStyle = textColor;
-      ctx.font = '12px Arial';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('🕐', currentX, centerY);
-      currentX += 12 + spacing;
-      
-      // 2. Timer
       ctx.font = 'bold 11px monospace';
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'left';
       ctx.fillText(matchTime, currentX, centerY);
       currentX += timerWidth + spacing;
       
-      // 3. HalfTime (1°T / 2°T)
+      // 2. HalfTime (1°T / 2°T)
       ctx.font = 'bold 9px Arial';
       ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
       ctx.fillText(halfTime, currentX, centerY);
-      currentX += halfTimeWidth + spacing;
+      currentX += halfTimeWidth + spacing + 8;
       
-      // 4. Separatore verticale
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(currentX, boxY + 8);
-      ctx.lineTo(currentX, boxY + boxHeight - 8);
-      ctx.stroke();
-      currentX += 1 + spacing;
+      // 3. Team 1 - Rettangolo colorato
+      ctx.fillStyle = '#2196F3'; // Blu
+      ctx.fillRect(currentX, boxY + 8, 3, boxHeight - 16);
+      currentX += 3 + 6;
       
-      // 5. Team 1 - Nome
+      // Team 1 - Nome (troncato a 10 caratteri)
+      final team1Text = team1NameText.length > 10 ? team1NameText.substring(0, 10) : team1NameText;
       ctx.fillStyle = textColor;
       ctx.font = '600 11px Arial';
-      ctx.textAlign = 'left';
-      ctx.fillText(team1NameText, currentX, centerY - 7);
+      ctx.textAlign = 'center';
+      final team1X = currentX + 30;
+      ctx.fillText(team1Text, team1X, centerY - 7);
       
       // Team 1 - Punteggio
       ctx.font = 'bold 11px Arial';
-      ctx.fillText('${team1Score}', currentX + team1NameWidth / 2 - 5, centerY + 7);
-      currentX += team1NameWidth.clamp(0, 60) + spacing + scoreWidth / 2 + spacing;
+      ctx.fillText('${team1Score}', team1X, centerY + 7);
+      currentX += 60 + spacing + 8;
       
-      // 6. Separatore verticale
-      ctx.beginPath();
-      ctx.moveTo(currentX, boxY + 8);
-      ctx.lineTo(currentX, boxY + boxHeight - 8);
-      ctx.stroke();
-      currentX += 1 + spacing;
+      // 4. Team 2 - Rettangolo colorato
+      ctx.fillStyle = '#F44336'; // Rosso
+      ctx.fillRect(currentX, boxY + 8, 3, boxHeight - 16);
+      currentX += 3 + 6;
       
-      // 7. Team 2 - Nome
+      // Team 2 - Nome (troncato a 10 caratteri)
+      final team2Text = team2NameText.length > 10 ? team2NameText.substring(0, 10) : team2NameText;
+      ctx.fillStyle = textColor;
       ctx.font = '600 11px Arial';
-      ctx.fillText(team2NameText, currentX, centerY - 7);
+      ctx.textAlign = 'center';
+      final team2X = currentX + 30;
+      ctx.fillText(team2Text, team2X, centerY - 7);
       
       // Team 2 - Punteggio
       ctx.font = 'bold 11px Arial';
-      ctx.fillText('${team2Score}', currentX + team2NameWidth / 2 - 5, centerY + 7);
+      ctx.fillText('${team2Score}', team2X, centerY + 7);
       
     } else {
       // === LAYOUT VERTICALE ===

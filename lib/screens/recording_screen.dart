@@ -196,7 +196,6 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                     Row(
                                       spacing: 4,
                                       children: [
-                                        const Icon(Icons.schedule, color: Colors.white, size: 12),
                                         Text(
                                           matchController.formatMatchTime(matchController.matchTime.value),
                                           style: const TextStyle(
