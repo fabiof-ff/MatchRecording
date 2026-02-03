@@ -133,10 +133,11 @@ class _RecordingScreenState extends State<RecordingScreen> {
                       
                       if (isLandscape) {
                         // LAYOUT LANDSCAPE COMPLETO - SENZA ROTAZIONE
-                        return Positioned(
-                          left: 12,
-                          top: 12,
-                          child: Transform.rotate(
+                        return Align(
+                          alignment: Alignment.topLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Transform.rotate(
                             angle: 0, // Nessuna rotazione
                             origin: const Offset(0, 0),
                             child: Container(
@@ -148,7 +149,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                   Positioned(
                                     top: 12,
                                     left: 12,
-                              child: Container(
+                              child: Obx(() => Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                 decoration: BoxDecoration(
                                   color: Colors.black.withOpacity(0.7),
@@ -290,7 +291,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                     ),
                                   ],
                                 ),
-                              ),
+                              )),
                             ),
                             
                             // 2. Recording indicator in alto a destra (se attivo)
@@ -430,6 +431,78 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                       ),
                                     ),
                                     
+                                    // Add 10 seconds button
+                                    Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        onTap: () {
+                                          matchController.addTime(10);
+                                        },
+                                        child: Container(
+                                          width: 50,
+                                          height: 50,
+                                          decoration: BoxDecoration(
+                                            color: Colors.black.withOpacity(0.7),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.add,
+                                                color: Colors.white,
+                                                size: 18,
+                                              ),
+                                              Text(
+                                                '10s',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    
+                                    // Subtract 10 seconds button
+                                    Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        onTap: () {
+                                          matchController.subtractTime(10);
+                                        },
+                                        child: Container(
+                                          width: 50,
+                                          height: 50,
+                                          decoration: BoxDecoration(
+                                            color: Colors.black.withOpacity(0.7),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.remove,
+                                                color: Colors.white,
+                                                size: 18,
+                                              ),
+                                              Text(
+                                                '10s',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    
                                     // Toggle half time button
                                     Material(
                                       color: Colors.transparent,
@@ -499,6 +572,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                             ),
                           ],
                         ),
+                            ),
                             ),
                           ),
                         );
