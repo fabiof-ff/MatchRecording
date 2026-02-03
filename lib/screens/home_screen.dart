@@ -213,53 +213,9 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  
-                  // Info percorso salvataggio video
-                  TextButton.icon(
-                    onPressed: () {
-                      try {
-                        final cameraController = Get.find<CameraRecordingController>();
-                        final dir = cameraController.getVideoSaveDirectory();
-                        Get.dialog(
-                          AlertDialog(
-                            title: const Text('📁 Percorso Salvataggio'),
-                            content: SelectableText(
-                              dir,
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Get.back(),
-                                child: const Text('OK'),
-                              ),
-                            ],
-                          ),
-                        );
-                      } catch (e) {
-                        // Camera non ancora inizializzata
-                      }
-                    },
-                    icon: const Icon(Icons.folder_outlined, size: 18),
-                    label: const Text('Dove vengono salvati i video?'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.grey.shade700,
-                    ),
-                  ),
                 ],
               ),
             ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(8),
-        color: Colors.grey.shade100,
-        child: Text(
-          'Ultimo deploy: 28/01/2026 - 21:14',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 11,
-            color: Colors.grey.shade600,
           ),
         ),
       ),

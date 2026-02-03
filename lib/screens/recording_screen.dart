@@ -147,8 +147,8 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                 children: [
                                   // 1. Overlay compatto in alto a sinistra
                                   Positioned(
-                                    top: 12,
-                                    left: 12,
+                                    top: 0,
+                                    left: 0,
                               child: Obx(() => Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                                 decoration: BoxDecoration(
@@ -200,7 +200,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                             : matchController.team1Name.value,
                                           style: const TextStyle(
                                             color: Colors.white,
-                                            fontSize: 14,
+                                            fontSize: 11,
                                             fontWeight: FontWeight.w600,
                                           ),
                                           textAlign: TextAlign.center,
@@ -214,7 +214,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                               onTap: matchController.subtractGoalTeam1,
                                               child: Container(
                                                 padding: const EdgeInsets.all(2),
-                                                child: const Icon(Icons.remove_circle, color: Colors.blue, size: 28),
+                                                child: const Icon(Icons.remove_circle, color: Colors.blue, size: 18),
                                               ),
                                             ),
                                             Text(
@@ -222,14 +222,14 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 24,
+                                                fontSize: 11,
                                               ),
                                             ),
                                             InkWell(
                                               onTap: matchController.addGoalTeam1,
                                               child: Container(
                                                 padding: const EdgeInsets.all(2),
-                                                child: const Icon(Icons.add_circle, color: Colors.blue, size: 28),
+                                                child: const Icon(Icons.add_circle, color: Colors.blue, size: 18),
                                               ),
                                             ),
                                           ],
@@ -253,7 +253,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                             : matchController.team2Name.value,
                                           style: const TextStyle(
                                             color: Colors.white,
-                                            fontSize: 14,
+                                            fontSize: 11,
                                             fontWeight: FontWeight.w600,
                                           ),
                                           textAlign: TextAlign.center,
@@ -267,7 +267,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                               onTap: matchController.subtractGoalTeam2,
                                               child: Container(
                                                 padding: const EdgeInsets.all(2),
-                                                child: const Icon(Icons.remove_circle, color: Colors.red, size: 28),
+                                                child: const Icon(Icons.remove_circle, color: Colors.red, size: 18),
                                               ),
                                             ),
                                             Text(
@@ -275,14 +275,14 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 24,
+                                                fontSize: 11,
                                               ),
                                             ),
                                             InkWell(
                                               onTap: matchController.addGoalTeam2,
                                               child: Container(
                                                 padding: const EdgeInsets.all(2),
-                                                child: const Icon(Icons.add_circle, color: Colors.red, size: 28),
+                                                child: const Icon(Icons.add_circle, color: Colors.red, size: 18),
                                               ),
                                             ),
                                           ],
@@ -335,7 +335,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                             
                             // 3. Pulsanti azione VERTICALI sul lato destro
                             Positioned(
-                              right: 6,
+                              right: 0,
                               top: 0,
                               bottom: 0,
                               child: Center(
@@ -354,8 +354,8 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                           Get.back();
                                         },
                                         child: Container(
-                                          width: 32,
-                                          height: 32,
+                                          width: 40,
+                                          height: 40,
                                           decoration: BoxDecoration(
                                             color: Colors.black.withOpacity(0.7),
                                             shape: BoxShape.circle,
@@ -363,7 +363,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                           child: const Icon(
                                             Icons.arrow_back,
                                             color: Colors.white,
-                                            size: 18,
+                                            size: 22,
                                           ),
                                         ),
                                       ),
@@ -378,8 +378,8 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                               ? matchController.markHighlight
                                               : null,
                                           child: Container(
-                                            width: 32,
-                                            height: 32,
+                                            width: 40,
+                                            height: 40,
                                             decoration: BoxDecoration(
                                               color: matchController.isRecording.value
                                                   ? Colors.amber
@@ -389,7 +389,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                             child: const Icon(
                                               Icons.star,
                                               color: Colors.black,
-                                              size: 18,
+                                              size: 22,
                                             ),
                                           ),
                                         ),
@@ -411,8 +411,8 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                             }
                                           },
                                           child: Container(
-                                            width: 32,
-                                            height: 32,
+                                            width: 40,
+                                            height: 40,
                                             decoration: BoxDecoration(
                                               color: matchController.isRecording.value
                                                   ? Colors.red
@@ -424,7 +424,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                                   ? Icons.stop
                                                   : Icons.circle,
                                               color: Colors.white,
-                                              size: 18,
+                                              size: 22,
                                             ),
                                           ),
                                         ),
@@ -439,8 +439,8 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                           matchController.toggleTimerPause();
                                         },
                                         child: Container(
-                                          width: 32,
-                                          height: 32,
+                                          width: 40,
+                                          height: 40,
                                           decoration: BoxDecoration(
                                             color: Colors.black.withOpacity(0.7),
                                             shape: BoxShape.circle,
@@ -450,7 +450,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                                 ? Icons.play_arrow
                                                 : Icons.pause,
                                             color: Colors.white,
-                                            size: 18,
+                                            size: 22,
                                           )),
                                         ),
                                       ),
@@ -464,8 +464,8 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                           matchController.addTime(10);
                                         },
                                         child: Container(
-                                          width: 32,
-                                          height: 32,
+                                          width: 40,
+                                          height: 40,
                                           decoration: BoxDecoration(
                                             color: Colors.black.withOpacity(0.7),
                                             shape: BoxShape.circle,
@@ -476,13 +476,13 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                               Icon(
                                                 Icons.add,
                                                 color: Colors.white,
-                                                size: 12,
+                                                size: 16,
                                               ),
                                               Text(
                                                 '10s',
                                                 style: TextStyle(
                                                   color: Colors.white,
-                                                  fontSize: 8,
+                                                  fontSize: 9,
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
@@ -500,8 +500,8 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                           matchController.subtractTime(10);
                                         },
                                         child: Container(
-                                          width: 32,
-                                          height: 32,
+                                          width: 40,
+                                          height: 40,
                                           decoration: BoxDecoration(
                                             color: Colors.black.withOpacity(0.7),
                                             shape: BoxShape.circle,
@@ -512,13 +512,13 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                               Icon(
                                                 Icons.remove,
                                                 color: Colors.white,
-                                                size: 12,
+                                                size: 16,
                                               ),
                                               Text(
                                                 '10s',
                                                 style: TextStyle(
                                                   color: Colors.white,
-                                                  fontSize: 8,
+                                                  fontSize: 9,
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
@@ -536,8 +536,8 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                           matchController.toggleHalfTime();
                                         },
                                         child: Container(
-                                          width: 32,
-                                          height: 32,
+                                          width: 40,
+                                          height: 40,
                                           decoration: BoxDecoration(
                                             color: Colors.black.withOpacity(0.7),
                                             shape: BoxShape.circle,
@@ -548,7 +548,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 9,
+                                                fontSize: 11,
                                               ),
                                             )),
                                           ),
@@ -564,8 +564,8 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                           _cameraRecordingController.zoomIn();
                                         },
                                         child: Container(
-                                          width: 32,
-                                          height: 32,
+                                          width: 40,
+                                          height: 40,
                                           decoration: BoxDecoration(
                                             color: Colors.black.withOpacity(0.7),
                                             shape: BoxShape.circle,
@@ -573,7 +573,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                           child: const Icon(
                                             Icons.zoom_in,
                                             color: Colors.white,
-                                            size: 18,
+                                            size: 22,
                                           ),
                                         ),
                                       ),
@@ -587,8 +587,8 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                           _cameraRecordingController.zoomOut();
                                         },
                                         child: Container(
-                                          width: 32,
-                                          height: 32,
+                                          width: 40,
+                                          height: 40,
                                           decoration: BoxDecoration(
                                             color: Colors.black.withOpacity(0.7),
                                             shape: BoxShape.circle,
@@ -596,7 +596,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                           child: const Icon(
                                             Icons.zoom_out,
                                             color: Colors.white,
-                                            size: 18,
+                                            size: 22,
                                           ),
                                         ),
                                       ),
