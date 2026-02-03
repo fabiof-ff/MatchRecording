@@ -328,25 +328,25 @@ class WebVideoRecorder {
     
     if (isLandscape) {
       // === LAYOUT LANDSCAPE COMPATTO - IDENTICO ALLA PREVIEW ===
-      // Overlay compatto in alto a sinistra (0, 0)
-      final boxX = 0.0;
-      final boxY = 0.0;
+      // Overlay compatto in alto a sinistra (5, 5)
+      final boxX = 5.0;
+      final boxY = 5.0;
       final padding = 6.0;
       final spacing = 4.0;
       
       // Calcola dimensioni del box
-      ctx.font = 'bold 11px monospace';
+      ctx.font = 'bold 15px monospace';
       final timerWidth = ctx.measureText(matchTime).width!.toDouble();
-      ctx.font = 'bold 9px Arial';
+      ctx.font = 'bold 13px Arial';
       final halfTimeWidth = ctx.measureText(' $halfTime').width!.toDouble();
-      ctx.font = '600 11px Arial';
+      ctx.font = '600 15px Arial';
       final team1NameText = team1Name.length > 10 ? team1Name.substring(0, 10) : team1Name;
       final team2NameText = team2Name.length > 10 ? team2Name.substring(0, 10) : team2Name;
       
       final boxWidth = padding + timerWidth + spacing + halfTimeWidth + spacing + 8 + // Timer section
-                       3 + 6 + 60 + spacing + 8 + // Team 1 (rettangolo + nome + punteggio)
-                       3 + 6 + 60 + padding; // Team 2 (rettangolo + nome + punteggio)
-      final boxHeight = padding * 2 + 30;
+                       3 + 6 + 85 + spacing + 8 + // Team 1 (rettangolo + nome + punteggio)
+                       3 + 6 + 85 + padding; // Team 2 (rettangolo + nome + punteggio)
+      final boxHeight = padding * 2 + 34;
       
       // Disegna box background
       ctx.fillStyle = bgColor;
@@ -358,14 +358,14 @@ class WebVideoRecorder {
       
       // 1. Timer
       ctx.fillStyle = textColor;
-      ctx.font = 'bold 11px monospace';
+      ctx.font = 'bold 15px monospace';
       ctx.textBaseline = 'middle';
       ctx.textAlign = 'left';
       ctx.fillText(matchTime, currentX, centerY);
       currentX += timerWidth + spacing;
       
       // 2. HalfTime (1°T / 2°T)
-      ctx.font = 'bold 9px Arial';
+      ctx.font = 'bold 13px Arial';
       ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
       ctx.fillText(halfTime, currentX, centerY);
       currentX += halfTimeWidth + spacing + 8;
@@ -378,15 +378,15 @@ class WebVideoRecorder {
       // Team 1 - Nome (troncato a 10 caratteri)
       final team1Text = team1NameText.length > 10 ? team1NameText.substring(0, 10) : team1NameText;
       ctx.fillStyle = textColor;
-      ctx.font = '600 11px Arial';
+      ctx.font = '600 15px Arial';
       ctx.textAlign = 'center';
-      final team1X = currentX + 30;
+      final team1X = currentX + 42;
       ctx.fillText(team1Text, team1X, centerY - 7);
       
       // Team 1 - Punteggio
-      ctx.font = 'bold 11px Arial';
+      ctx.font = 'bold 15px Arial';
       ctx.fillText('${team1Score}', team1X, centerY + 7);
-      currentX += 60 + spacing + 8;
+      currentX += 85 + spacing + 8;
       
       // 4. Team 2 - Rettangolo colorato
       ctx.fillStyle = '#F44336'; // Rosso
@@ -396,13 +396,13 @@ class WebVideoRecorder {
       // Team 2 - Nome (troncato a 10 caratteri)
       final team2Text = team2NameText.length > 10 ? team2NameText.substring(0, 10) : team2NameText;
       ctx.fillStyle = textColor;
-      ctx.font = '600 11px Arial';
+      ctx.font = '600 15px Arial';
       ctx.textAlign = 'center';
-      final team2X = currentX + 30;
+      final team2X = currentX + 42;
       ctx.fillText(team2Text, team2X, centerY - 7);
       
       // Team 2 - Punteggio
-      ctx.font = 'bold 11px Arial';
+      ctx.font = 'bold 15px Arial';
       ctx.fillText('${team2Score}', team2X, centerY + 7);
       
     } else {
