@@ -78,6 +78,9 @@ class MatchController extends GetxController {
     isRecording.value = true;
     recordingTime.value = Duration.zero; // Reset timer registrazione
     
+    // Assicurati che l'overlay sia inizializzato anche se il timer non è ancora partito
+    _updateOverlay();
+    
     // Avvia timer di registrazione
     _recordingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       recordingTime.value = Duration(seconds: recordingTime.value.inSeconds + 1);
@@ -103,6 +106,15 @@ class MatchController extends GetxController {
     _timer?.cancel();
     isTimerStarted.value = false;
     print('⏹️ Timer partita fermato');
+  }
+
+  void resetMatch() {
+    _timer?.cancel();
+    matchTime.value = Duration.zero;
+    isTimerStarted.value = false;
+    isTimerPaused.value = false;
+    _updateOverlay();
+    print('🔄 Timer partita resettato');
   }
 
   void _startTimer() {

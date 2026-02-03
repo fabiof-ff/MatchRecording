@@ -327,67 +327,93 @@ class WebVideoRecorder {
     final textColor = 'white';
     
     if (isLandscape) {
-      // === LAYOUT LANDSCAPE COMPATTO (senza rotazione) ===
-      // Nessuna rotazione del canvas
+      // === LAYOUT LANDSCAPE COMPATTO - IDENTICO ALLA PREVIEW ===
+      // Overlay compatto in alto a sinistra (0, 0)
+      final boxX = 0.0;
+      final boxY = 0.0;
+      final padding = 6.0;
+      final spacing = 4.0;
       
-      // Overlay compatto in alto a sinistra
-      final margin = 12.0;
-      final boxX = margin;
-      final boxY = margin;
-      final boxWidth = 340.0; // Allargato ulteriormente
-      final boxHeight = 75.0; // Aumentato per più righe
-      final borderRadius = 8.0;
+      // Calcola dimensioni del box
+      ctx.font = 'bold 11px monospace';
+      final timerWidth = ctx.measureText(matchTime).width!.toDouble();
+      ctx.font = 'bold 9px Arial';
+      final halfTimeWidth = ctx.measureText(' $halfTime').width!.toDouble();
+      ctx.font = '600 11px Arial';
+      final team1NameText = team1Name.length > 10 ? team1Name.substring(0, 10) : team1Name;
+      final team2NameText = team2Name.length > 10 ? team2Name.substring(0, 10) : team2Name;
+      final team1NameWidth = ctx.measureText(team1NameText).width!.toDouble();
+      final team2NameWidth = ctx.measureText(team2NameText).width!.toDouble();
+      ctx.font = 'bold 11px Arial';
+      final scoreWidth = ctx.measureText('${team1Score}').width!.toDouble() + ctx.measureText('${team2Score}').width!.toDouble();
       
+      final boxWidth = padding + 12 + spacing + timerWidth + halfTimeWidth + spacing + // Timer section
+                       1 + spacing + // Separatore 1
+                       team1NameWidth.clamp(0, 60) + spacing + scoreWidth + spacing + // Team 1
+                       1 + spacing + // Separatore 2
+                       team2NameWidth.clamp(0, 60) + spacing + scoreWidth + padding; // Team 2
+      final boxHeight = padding * 2 + 30;
+      
+      // Disegna box background
       ctx.fillStyle = bgColor;
-      _drawRoundedRect(ctx, boxX, boxY, boxWidth, boxHeight, borderRadius);
+      _drawRoundedRect(ctx, boxX, boxY, boxWidth, boxHeight, 8);
       ctx.fill();
       
-      // Colonna sinistra: Tempo e indicatore frazione
+      var currentX = boxX + padding;
+      final centerY = boxY + boxHeight / 2;
+      
+      // 1. Icona timer
       ctx.fillStyle = textColor;
-      ctx.font = '20px Arial'; // Font ingrandito
-      ctx.fillText('🕐', boxX + 14, boxY + 18);
-      
-      ctx.font = 'bold 18px monospace'; // Font ingrandito
+      ctx.font = '12px Arial';
       ctx.textBaseline = 'middle';
-      ctx.fillText(matchTime, boxX + 46, boxY + 20);
+      ctx.fillText('🕐', currentX, centerY);
+      currentX += 12 + spacing;
       
-      // Indicatore tempo (1° T / 2° T) sotto il cronometro
-      ctx.font = 'bold 16px Arial'; // Font ingrandito
+      // 2. Timer
+      ctx.font = 'bold 11px monospace';
+      ctx.fillText(matchTime, currentX, centerY);
+      currentX += timerWidth + spacing;
+      
+      // 3. HalfTime (1°T / 2°T)
+      ctx.font = 'bold 9px Arial';
       ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-      ctx.fillText(halfTime, boxX + 46, boxY + 44);
+      ctx.fillText(halfTime, currentX, centerY);
+      currentX += halfTimeWidth + spacing;
       
-      // Separatore verticale
+      // 4. Separatore verticale
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(boxX + 130, boxY + 10);
-      ctx.lineTo(boxX + 130, boxY + boxHeight - 10);
+      ctx.moveTo(currentX, boxY + 8);
+      ctx.lineTo(currentX, boxY + boxHeight - 8);
       ctx.stroke();
+      currentX += 1 + spacing;
       
-      // Colonna destra: Nomi squadre e punteggio
-      ctx.textAlign = 'left';
-      
-      // Nomi squadre (riga superiore) con colori
-      ctx.font = 'bold 15px Arial'; // Font ingrandito
-      
-      // Team 1
-      ctx.fillStyle = team1Color;
-      ctx.fillText(team1Name, boxX + 165, boxY + 22);
-      
-      // Separatore
-      final team1Width = ctx.measureText(team1Name).width!.toDouble();
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-      ctx.fillText(' - ', boxX + 165 + team1Width, boxY + 22);
-      
-      // Team 2
-      final separatorWidth = ctx.measureText(' - ').width!.toDouble();
-      ctx.fillStyle = team2Color;
-      ctx.fillText(team2Name, boxX + 165 + team1Width + separatorWidth, boxY + 22);
-      
-      // Punteggio (riga inferiore, più grande)
+      // 5. Team 1 - Nome
       ctx.fillStyle = textColor;
-      ctx.font = 'bold 26px Arial'; // Font ancora più grande
-      ctx.fillText('$team1Score-$team2Score', boxX + 210, boxY + 54);
+      ctx.font = '600 11px Arial';
+      ctx.textAlign = 'left';
+      ctx.fillText(team1NameText, currentX, centerY - 7);
+      
+      // Team 1 - Punteggio
+      ctx.font = 'bold 11px Arial';
+      ctx.fillText('${team1Score}', currentX + team1NameWidth / 2 - 5, centerY + 7);
+      currentX += team1NameWidth.clamp(0, 60) + spacing + scoreWidth / 2 + spacing;
+      
+      // 6. Separatore verticale
+      ctx.beginPath();
+      ctx.moveTo(currentX, boxY + 8);
+      ctx.lineTo(currentX, boxY + boxHeight - 8);
+      ctx.stroke();
+      currentX += 1 + spacing;
+      
+      // 7. Team 2 - Nome
+      ctx.font = '600 11px Arial';
+      ctx.fillText(team2NameText, currentX, centerY - 7);
+      
+      // Team 2 - Punteggio
+      ctx.font = 'bold 11px Arial';
+      ctx.fillText('${team2Score}', currentX + team2NameWidth / 2 - 5, centerY + 7);
       
     } else {
       // === LAYOUT VERTICALE ===
