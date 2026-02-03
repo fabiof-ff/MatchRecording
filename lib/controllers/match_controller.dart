@@ -12,6 +12,7 @@ class MatchController extends GetxController {
   final isTimerPaused = false.obs;
   final isTimerStarted = false.obs; // Indica se il timer è stato avviato almeno una volta
   final matchTime = Duration.zero.obs;
+  final recordingTime = Duration.zero.obs; // Timer separato per la registrazione
   final team1Score = 0.obs;
   final team2Score = 0.obs;
   final team1Name = 'Squadra 1'.obs;
@@ -25,6 +26,7 @@ class MatchController extends GetxController {
   final initialTimer = Duration.zero.obs; // Timer iniziale impostato dall'utente
 
   Timer? _timer;
+  Timer? _recordingTimer; // Timer separato per la registrazione
   CameraRecordingController? _cameraController;
 
   void setCameraController(CameraRecordingController controller) {
@@ -74,6 +76,12 @@ class MatchController extends GetxController {
 
   void startRecording() {
     isRecording.value = true;
+    recordingTime.value = Duration.zero; // Reset timer registrazione
+    
+    // Avvia timer di registrazione
+    _recordingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      recordingTime.value = Duration(seconds: recordingTime.value.inSeconds + 1);
+    });
     
     // Avvia registrazione video della camera
     _startVideoRecording();
@@ -83,6 +91,7 @@ class MatchController extends GetxController {
 
   void stopRecording() async {
     isRecording.value = false;
+    _recordingTimer?.cancel(); // Ferma timer registrazione
     
     // Ferma registrazione video della camera
     await _stopVideoRecording();

@@ -323,7 +323,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                               ),
                                             ),
                                             Text(
-                                              matchController.formatMatchTime(matchController.matchTime.value),
+                                              matchController.formatMatchTime(matchController.recordingTime.value),
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold,
