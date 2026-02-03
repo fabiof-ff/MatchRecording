@@ -65,8 +65,8 @@ class WebVideoRecorder {
     if (halfTime != null) this.halfTime = halfTime;
     if (isLandscape != null) this.isLandscape = isLandscape;
     
-    // Debug: stampa i valori aggiornati
-    print('🎯 Overlay values: $team1Name $team1Score - $team2Score $team2Name | $matchTime $halfTime | Landscape: ${this.isLandscape}');
+    // Debug: stampa i valori aggiornati inclusi i colori
+    print('🎯 Overlay values: $team1Name $team1Score - $team2Score $team2Name | $matchTime $halfTime | Colors: T1=${this.team1Color} T2=${this.team2Color} | Landscape: ${this.isLandscape}');
   }
   
   /// Avvia la registrazione video web con overlay
@@ -317,7 +317,7 @@ class WebVideoRecorder {
     // Debug ogni secondo
     _frameCount++;
     if (_frameCount % 30 == 0) {
-      print('🎨 Drawing overlay: $team1Name $team1Score - $team2Score $team2Name | $matchTime | Landscape: $isLandscape');
+      print('🎨 Drawing overlay: $team1Name $team1Score - $team2Score $team2Name | $matchTime | Landscape: $isLandscape | COLORS: T1=$team1Color T2=$team2Color');
     }
     
     ctx.save();
@@ -371,7 +371,7 @@ class WebVideoRecorder {
       currentX += halfTimeWidth + spacing + 8;
       
       // 3. Team 1 - Rettangolo colorato
-      ctx.fillStyle = '#2196F3'; // Blu
+      ctx.fillStyle = team1Color; // Colore personalizzato Team 1
       ctx.fillRect(currentX, boxY + 8, 3, boxHeight - 16);
       currentX += 3 + 6;
       
@@ -389,7 +389,7 @@ class WebVideoRecorder {
       currentX += 85 + spacing + 8;
       
       // 4. Team 2 - Rettangolo colorato
-      ctx.fillStyle = '#F44336'; // Rosso
+      ctx.fillStyle = team2Color; // Colore personalizzato Team 2
       ctx.fillRect(currentX, boxY + 8, 3, boxHeight - 16);
       currentX += 3 + 6;
       

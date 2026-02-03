@@ -29,9 +29,21 @@ class MatchController extends GetxController {
   Timer? _recordingTimer; // Timer separato per la registrazione
   CameraRecordingController? _cameraController;
 
+  @override
+  void onInit() {
+    super.onInit();
+    
+    // Aggiungi listener per i colori delle squadre
+    ever(team1Color, (_) => _updateOverlay());
+    ever(team2Color, (_) => _updateOverlay());
+  }
+
   void setCameraController(CameraRecordingController controller) {
     _cameraController = controller;
     print('✅ CameraRecordingController collegato al MatchController');
+    
+    // Inizializza immediatamente l'overlay con i colori correnti
+    _updateOverlay();
   }
   
   void toggleHalfTime() {

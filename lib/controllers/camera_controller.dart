@@ -39,6 +39,7 @@ class CameraRecordingController extends GetxController {
     if (kIsWeb) {
       videosSaveDirectory.value = 'Web: download automatico nella cartella Download del browser';
       _webRecorder = WebVideoRecorder();
+      print('✅ WebVideoRecorder inizializzato');
       return;
     }
     
@@ -101,7 +102,24 @@ class CameraRecordingController extends GetxController {
     String? halfTime,
     bool? isLandscape,
   }) {
-    if (kIsWeb && _webRecorder != null) {
+    if (kIsWeb) {
+      if (_webRecorder == null) {
+        print('⚠️ _webRecorder non ancora inizializzato, updateOverlay ritentato dopo 100ms');
+        Future.delayed(const Duration(milliseconds: 100), () {
+          updateOverlay(
+            team1Name: team1Name,
+            team2Name: team2Name,
+            team1Color: team1Color,
+            team2Color: team2Color,
+            team1Score: team1Score,
+            team2Score: team2Score,
+            matchTime: matchTime,
+            halfTime: halfTime,
+            isLandscape: isLandscape,
+          );
+        });
+        return;
+      }
       _webRecorder!.updateOverlay(
         team1Name: team1Name,
         team2Name: team2Name,

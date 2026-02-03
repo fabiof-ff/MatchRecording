@@ -25,8 +25,14 @@ class _RecordingScreenState extends State<RecordingScreen> {
       DeviceOrientation.landscapeRight,
     ]);
     
-    // Inizializza il camera controller
-    _cameraRecordingController = Get.put(CameraRecordingController());
+    // Inizializza il camera controller (o riutilizza se esiste già)
+    if (Get.isRegistered<CameraRecordingController>()) {
+      _cameraRecordingController = Get.find<CameraRecordingController>();
+      print('🔄 Riutilizzo CameraRecordingController esistente');
+    } else {
+      _cameraRecordingController = Get.put(CameraRecordingController(), permanent: true);
+      print('✨ Nuovo CameraRecordingController creato');
+    }
     
     // Collega il camera controller al match controller
     final matchController = Get.find<MatchController>();
@@ -246,7 +252,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                               onTap: matchController.subtractGoalTeam1,
                                               child: Container(
                                                 padding: const EdgeInsets.all(2),
-                                                child: const Icon(Icons.remove_circle, color: Colors.blue, size: 18),
+                                                child: Obx(() => Icon(Icons.remove_circle, color: matchController.team1Color.value, size: 18)),
                                               ),
                                             ),
                                             Text(
@@ -261,7 +267,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                               onTap: matchController.addGoalTeam1,
                                               child: Container(
                                                 padding: const EdgeInsets.all(2),
-                                                child: const Icon(Icons.add_circle, color: Colors.blue, size: 18),
+                                                child: Obx(() => Icon(Icons.add_circle, color: matchController.team1Color.value, size: 18)),
                                               ),
                                             ),
                                           ],
@@ -299,7 +305,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                               onTap: matchController.subtractGoalTeam2,
                                               child: Container(
                                                 padding: const EdgeInsets.all(2),
-                                                child: const Icon(Icons.remove_circle, color: Colors.red, size: 18),
+                                                child: Obx(() => Icon(Icons.remove_circle, color: matchController.team2Color.value, size: 18)),
                                               ),
                                             ),
                                             Text(
@@ -314,7 +320,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                               onTap: matchController.addGoalTeam2,
                                               child: Container(
                                                 padding: const EdgeInsets.all(2),
-                                                child: const Icon(Icons.add_circle, color: Colors.red, size: 18),
+                                                child: Obx(() => Icon(Icons.add_circle, color: matchController.team2Color.value, size: 18)),
                                               ),
                                             ),
                                           ],
@@ -362,323 +368,6 @@ class _RecordingScreenState extends State<RecordingScreen> {
                                         ),
                                       )
                                     : const SizedBox(),
-                              ),
-                            ),
-                            
-                            // 3. Pulsanti azione VERTICALI sul lato destro
-                            Positioned(
-                              right: 0,
-                              top: 0,
-                              bottom: 0,
-                              child: Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  spacing: 2,
-                                  children: [
-                                    // Back button
-                                    Material(
-                                      color: Colors.transparent,
-                                      child: InkWell(
-                                        onTap: () {
-                                          if (matchController.isRecording.value) {
-                                            matchController.stopRecording();
-                                          }
-                                          Get.back();
-                                        },
-                                        child: Container(
-                                          width: 40,
-                                          height: 40,
-                                          decoration: BoxDecoration(
-                                            color: Colors.black.withOpacity(0.7),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: const Icon(
-                                            Icons.arrow_back,
-                                            color: Colors.white,
-                                            size: 22,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    
-                                    // Highlight button
-                                    Obx(
-                                      () => Material(
-                                        color: Colors.transparent,
-                                        child: InkWell(
-                                          onTap: matchController.isRecording.value
-                                              ? matchController.markHighlight
-                                              : null,
-                                          child: Container(
-                                            width: 40,
-                                            height: 40,
-                                            decoration: BoxDecoration(
-                                              color: matchController.isRecording.value
-                                                  ? Colors.amber
-                                                  : Colors.grey.withOpacity(0.5),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: const Icon(
-                                              Icons.star,
-                                              color: Colors.black,
-                                              size: 22,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    
-                                    // Record/Stop button
-                                    Obx(
-                                      () => Material(
-                                        color: Colors.transparent,
-                                        child: InkWell(
-                                          onTap: () async {
-                                            if (matchController.isRecording.value) {
-                                              matchController.stopRecording();
-                                              await _cameraRecordingController.stopVideoRecording();
-                                            } else {
-                                              matchController.startRecording();
-                                              await _cameraRecordingController.startVideoRecording();
-                                            }
-                                          },
-                                          child: Container(
-                                            width: 40,
-                                            height: 40,
-                                            decoration: BoxDecoration(
-                                              color: matchController.isRecording.value
-                                                  ? Colors.red
-                                                  : Colors.green,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: Icon(
-                                              matchController.isRecording.value
-                                                  ? Icons.stop
-                                                  : Icons.circle,
-                                              color: Colors.white,
-                                              size: 22,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    
-                                    // Toggle half time button
-                                    Material(
-                                      color: Colors.transparent,
-                                      child: InkWell(
-                                        onTap: () {
-                                          matchController.toggleHalfTime();
-                                        },
-                                        child: Container(
-                                          width: 40,
-                                          height: 40,
-                                          decoration: BoxDecoration(
-                                            color: Colors.black.withOpacity(0.7),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: Center(
-                                            child: Obx(() => Text(
-                                              matchController.halfTime.value,
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 11,
-                                              ),
-                                            )),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    
-                                    // Play/Pause and Reset row
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      spacing: 2,
-                                      children: [
-                                        // Pause/Play timer button
-                                        Material(
-                                          color: Colors.transparent,
-                                          child: InkWell(
-                                            onTap: () {
-                                              matchController.toggleTimerPause();
-                                            },
-                                            child: Container(
-                                              width: 40,
-                                              height: 40,
-                                              decoration: BoxDecoration(
-                                                color: Colors.black.withOpacity(0.7),
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: Obx(() => Icon(
-                                                !matchController.isTimerStarted.value || matchController.isTimerPaused.value
-                                                    ? Icons.play_arrow
-                                                    : Icons.pause,
-                                                color: Colors.white,
-                                                size: 22,
-                                              )),
-                                            ),
-                                          ),
-                                        ),
-                                        
-                                        // Reset timer button
-                                        Material(
-                                          color: Colors.transparent,
-                                          child: InkWell(
-                                            onTap: () {
-                                              matchController.resetMatch();
-                                            },
-                                            child: Container(
-                                              width: 40,
-                                              height: 40,
-                                              decoration: BoxDecoration(
-                                                color: Colors.black.withOpacity(0.7),
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: const Icon(
-                                                Icons.refresh,
-                                                color: Colors.white,
-                                                size: 22,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    
-                                    // +10s and -10s row
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      spacing: 2,
-                                      children: [
-                                        // Add 10 seconds button
-                                        Material(
-                                          color: Colors.transparent,
-                                          child: InkWell(
-                                            onTap: () {
-                                              matchController.addTime(10);
-                                            },
-                                            child: Container(
-                                              width: 40,
-                                              height: 40,
-                                              decoration: BoxDecoration(
-                                                color: Colors.black.withOpacity(0.7),
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: const Column(
-                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                children: [
-                                                  Icon(
-                                                    Icons.add,
-                                                    color: Colors.white,
-                                                    size: 16,
-                                                  ),
-                                                  Text(
-                                                    '10s',
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 9,
-                                                      fontWeight: FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        
-                                        // Subtract 10 seconds button
-                                        Material(
-                                          color: Colors.transparent,
-                                          child: InkWell(
-                                            onTap: () {
-                                              matchController.subtractTime(10);
-                                            },
-                                            child: Container(
-                                              width: 40,
-                                              height: 40,
-                                              decoration: BoxDecoration(
-                                                color: Colors.black.withOpacity(0.7),
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: const Column(
-                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                children: [
-                                                  Icon(
-                                                    Icons.remove,
-                                                    color: Colors.white,
-                                                    size: 16,
-                                                  ),
-                                                  Text(
-                                                    '10s',
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 9,
-                                                      fontWeight: FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    
-                                    // Zoom in and zoom out row
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      spacing: 2,
-                                      children: [
-                                        // Zoom in button
-                                        Material(
-                                          color: Colors.transparent,
-                                          child: InkWell(
-                                            onTap: () {
-                                              _cameraRecordingController.zoomIn();
-                                            },
-                                            child: Container(
-                                              width: 40,
-                                              height: 40,
-                                              decoration: BoxDecoration(
-                                                color: Colors.black.withOpacity(0.7),
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: const Icon(
-                                                Icons.zoom_in,
-                                                color: Colors.white,
-                                                size: 22,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        
-                                        // Zoom out button
-                                        Material(
-                                          color: Colors.transparent,
-                                          child: InkWell(
-                                            onTap: () {
-                                              _cameraRecordingController.zoomOut();
-                                            },
-                                            child: Container(
-                                              width: 40,
-                                              height: 40,
-                                              decoration: BoxDecoration(
-                                                color: Colors.black.withOpacity(0.7),
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: const Icon(
-                                                Icons.zoom_out,
-                                                color: Colors.white,
-                                                size: 22,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
                               ),
                             ),
                             
@@ -758,6 +447,332 @@ class _RecordingScreenState extends State<RecordingScreen> {
                         );
                       }
                     },
+                  ),
+                  
+                  // Pulsanti azione VERTICALI sul lato destro (solo in landscape)
+                  Positioned(
+                    right: 15,
+                    top: 0,
+                    bottom: 0,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+                        
+                        if (!isLandscape) {
+                          return const SizedBox();
+                        }
+                        
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          spacing: 2,
+                          children: [
+                              // Back button
+                              Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: () {
+                                    if (matchController.isRecording.value) {
+                                      matchController.stopRecording();
+                                    }
+                                    Get.back();
+                                  },
+                                  child: Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.7),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.arrow_back,
+                                      color: Colors.white,
+                                      size: 22,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              
+                              // Highlight button
+                              Obx(
+                                () => Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: matchController.isRecording.value
+                                        ? matchController.markHighlight
+                                        : null,
+                                    child: Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: matchController.isRecording.value
+                                            ? Colors.amber
+                                            : Colors.grey.withOpacity(0.5),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.star,
+                                        color: Colors.black,
+                                        size: 22,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              
+                              // Record/Stop button
+                              Obx(
+                                () => Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: () async {
+                                      if (matchController.isRecording.value) {
+                                        matchController.stopRecording();
+                                        await _cameraRecordingController.stopVideoRecording();
+                                      } else {
+                                        matchController.startRecording();
+                                        await _cameraRecordingController.startVideoRecording();
+                                      }
+                                    },
+                                    child: Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: matchController.isRecording.value
+                                            ? Colors.red
+                                            : Colors.green,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        matchController.isRecording.value
+                                            ? Icons.stop
+                                            : Icons.circle,
+                                        color: Colors.white,
+                                        size: 22,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              
+                              // Toggle half time button
+                              Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: () {
+                                    matchController.toggleHalfTime();
+                                  },
+                                  child: Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.7),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Center(
+                                      child: Obx(() => Text(
+                                        matchController.halfTime.value,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 11,
+                                        ),
+                                      )),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              
+                              // Play/Pause and Reset row
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                spacing: 2,
+                                children: [
+                                  // Pause/Play timer button
+                                  Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: () {
+                                        matchController.toggleTimerPause();
+                                      },
+                                      child: Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withOpacity(0.7),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Obx(() => Icon(
+                                          !matchController.isTimerStarted.value || matchController.isTimerPaused.value
+                                              ? Icons.play_arrow
+                                              : Icons.pause,
+                                          color: Colors.white,
+                                          size: 22,
+                                        )),
+                                      ),
+                                    ),
+                                  ),
+                                  
+                                  // Reset timer button
+                                  Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: () {
+                                        matchController.resetMatch();
+                                      },
+                                      child: Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withOpacity(0.7),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.refresh,
+                                          color: Colors.white,
+                                          size: 22,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              
+                              // +10s and -10s row
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                spacing: 2,
+                                children: [
+                                  // Add 10 seconds button
+                                  Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: () {
+                                        matchController.addTime(10);
+                                      },
+                                      child: Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withOpacity(0.7),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.add,
+                                              color: Colors.white,
+                                              size: 16,
+                                            ),
+                                            Text(
+                                              '10s',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 9,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  
+                                  // Subtract 10 seconds button
+                                  Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: () {
+                                        matchController.subtractTime(10);
+                                      },
+                                      child: Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withOpacity(0.7),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.remove,
+                                              color: Colors.white,
+                                              size: 16,
+                                            ),
+                                            Text(
+                                              '10s',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 9,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              
+                              // Zoom in and zoom out row
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                spacing: 2,
+                                children: [
+                                  // Zoom in button
+                                  Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: () {
+                                        _cameraRecordingController.zoomIn();
+                                      },
+                                      child: Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withOpacity(0.7),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.zoom_in,
+                                          color: Colors.white,
+                                          size: 22,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  
+                                  // Zoom out button
+                                  Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: () {
+                                        _cameraRecordingController.zoomOut();
+                                      },
+                                      child: Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withOpacity(0.7),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.zoom_out,
+                                          color: Colors.white,
+                                          size: 22,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                        );
+                      },
+                    ),
                   ),
                 ],
               );
