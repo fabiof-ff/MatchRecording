@@ -10,6 +10,7 @@ class MatchController extends GetxController {
   // Match data
   final isRecording = false.obs;
   final isTimerPaused = false.obs;
+  final isTimerStarted = false.obs; // Indica se il timer è stato avviato almeno una volta
   final matchTime = Duration.zero.obs;
   final team1Score = 0.obs;
   final team2Score = 0.obs;
@@ -60,14 +61,19 @@ class MatchController extends GetxController {
     }
   }
 
-  void startRecording() {
-    isRecording.value = true;
+  void startMatch() {
     matchTime.value = initialTimer.value; // Inizia dal timer impostato
     
     // Inizializza l'overlay con i valori correnti
     _updateOverlay();
     
     _startTimer();
+    
+    print('⏱️ Timer partita avviato');
+  }
+
+  void startRecording() {
+    isRecording.value = true;
     
     // Avvia registrazione video della camera
     _startVideoRecording();
@@ -77,12 +83,17 @@ class MatchController extends GetxController {
 
   void stopRecording() async {
     isRecording.value = false;
-    _timer?.cancel();
     
     // Ferma registrazione video della camera
     await _stopVideoRecording();
     
     print('⏹️ Registrazione fermata');
+  }
+
+  void stopMatch() {
+    _timer?.cancel();
+    isTimerStarted.value = false;
+    print('⏹️ Timer partita fermato');
   }
 
   void _startTimer() {
@@ -96,8 +107,17 @@ class MatchController extends GetxController {
   }
 
   void toggleTimerPause() {
-    isTimerPaused.value = !isTimerPaused.value;
-    print('⏯️ Timer ${isTimerPaused.value ? "in pausa" : "ripreso"}');
+    if (!isTimerStarted.value) {
+      // Prima volta che si preme play - avvia il timer
+      startMatch();
+      isTimerStarted.value = true;
+      isTimerPaused.value = false;
+      print('▶️ Timer avviato');
+    } else {
+      // Timer già avviato - pausa/riprendi
+      isTimerPaused.value = !isTimerPaused.value;
+      print('⏯️ Timer ${isTimerPaused.value ? "in pausa" : "ripreso"}');
+    }
   }
 
   Future<void> _startVideoRecording() async {

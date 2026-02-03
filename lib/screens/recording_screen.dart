@@ -35,6 +35,10 @@ class _RecordingScreenState extends State<RecordingScreen> {
 
   @override
   void dispose() {
+    // Ferma il timer della partita
+    final matchController = Get.find<MatchController>();
+    matchController.stopMatch();
+    
     // Ripristina solo orientamento portrait quando esci
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
