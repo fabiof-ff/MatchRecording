@@ -186,6 +186,10 @@ class _WebCameraPreviewState extends State<WebCameraPreview> {
       );
     }
 
-    return HtmlElementView(viewType: _viewType);
+    // Avvolgi l'HtmlElementView con IgnorePointer per permettere ai pulsanti
+    // sopra di ricevere i click
+    return IgnorePointer(
+      child: HtmlElementView(viewType: _viewType),
+    );
   }
 }

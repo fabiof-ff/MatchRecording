@@ -31,9 +31,7 @@ class MatchController extends GetxController {
   void toggleHalfTime() {
     halfTime.value = halfTime.value == '1° T' ? '2° T' : '1° T';
     // Aggiorna immediatamente l'overlay
-    if (isRecording.value) {
-      _updateOverlay();
-    }
+    _updateOverlay();
   }
   
   void _updateOverlay() {
@@ -115,18 +113,12 @@ class MatchController extends GetxController {
   }
 
   void addGoalTeam1() {
-    if (!isRecording.value) {
-      return;
-    }
     team1Score.value++;
     _updateOverlay();
     print('⚽ Gol ${team1Name.value}! Score: ${team1Score.value} - ${team2Score.value}');
   }
 
   void addGoalTeam2() {
-    if (!isRecording.value) {
-      return;
-    }
     team2Score.value++;
     _updateOverlay();
     print('⚽ Gol ${team2Name.value}! Score: ${team1Score.value} - ${team2Score.value}');
@@ -157,6 +149,21 @@ class MatchController extends GetxController {
     );
     highlights.add(highlight);
     print('⭐ Highlight marcato al ${highlight.formattedTime}');
+  }
+
+  void addTime(int seconds) {
+    matchTime.value = Duration(seconds: matchTime.value.inSeconds + seconds);
+    _updateOverlay();
+    print('⏱️ Aggiunti $seconds secondi. Tempo totale: ${formatMatchTime(matchTime.value)}');
+  }
+
+  void subtractTime(int seconds) {
+    final newSeconds = matchTime.value.inSeconds - seconds;
+    if (newSeconds >= 0) {
+      matchTime.value = Duration(seconds: newSeconds);
+      _updateOverlay();
+      print('⏱️ Sottratti $seconds secondi. Tempo totale: ${formatMatchTime(matchTime.value)}');
+    }
   }
 
   String formatMatchTime(Duration duration) {
