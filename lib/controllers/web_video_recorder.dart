@@ -17,6 +17,7 @@ class WebVideoRecorder {
   bool _isSavingPartialVideo = false; // Flag per evitare salvataggi multipli
   Timer? _memoryCleanupTimer; // Timer per pulizia periodica memoria
   Timer? _perfLogTimer; // Timer per log performance
+  Timer? _requestDataTimer; // Timer per forzare dataavailable su iOS
   int _segmentCount = 0; // Contatore segmenti video
   DateTime? _recordingStart;
   int _totalChunkBytes = 0;
@@ -89,6 +90,11 @@ class WebVideoRecorder {
     // Previeni doppie chiamate
     if (_isRecording) {
       print('⚠️ Registrazione già in corso, ignoro chiamata duplicata');
+      return;
+    }
+
+    if (_mediaRecorder != null) {
+      print('⚠️ MediaRecorder già inizializzato, ignoro chiamata duplicata');
       return;
     }
     
@@ -200,7 +206,7 @@ class WebVideoRecorder {
 
       // Cattura stream dal canvas PRIMA di iniziare a disegnare
       // captureStream() senza parametri cattura ogni volta che il canvas viene modificato
-      _canvasStream = _canvas!.captureStream();
+      _canvasStream = _canvas!.captureStream(1);
       
       // Aggiungi audio track dalla camera
       final audioTracks = _cameraStream!.getAudioTracks();
@@ -209,7 +215,7 @@ class WebVideoRecorder {
       }
 
       // Disegna frame con overlay ripetutamente (15 FPS - ottimizzato per iOS)
-      _drawTimer = Timer.periodic(const Duration(milliseconds: 67), (_) {
+      _drawTimer = Timer.periodic(const Duration(milliseconds: 1000), (_) {
         if (_canvas == null || _videoElement == null || ctx == null) return;
         
         // Verifica che il video sia in riproduzione
@@ -281,6 +287,9 @@ class WebVideoRecorder {
 
       // Avvia log performance ogni 10 secondi
       _startPerfLogging();
+
+      // Forza dataavailable ogni 5s (workaround iOS)
+      _startRequestDataTimer();
 
       print('🎥 Registrazione web avviata');
       print('📹 Genererò un chunk ogni 30 secondi (ottimizzato per iPhone SE)');
@@ -391,6 +400,9 @@ class WebVideoRecorder {
 
     _perfLogTimer?.cancel();
     _perfLogTimer = null;
+
+    _requestDataTimer?.cancel();
+    _requestDataTimer = null;
 
     // Ferma tutti i track degli stream
     _cameraStream?.getTracks().forEach((track) {
@@ -651,6 +663,19 @@ class WebVideoRecorder {
     });
   }
 
+  void _startRequestDataTimer() {
+    _requestDataTimer?.cancel();
+    _requestDataTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!_isRecording || _mediaRecorder == null) return;
+      try {
+        _mediaRecorder!.requestData();
+        _logPerf('request_data tick');
+      } catch (e) {
+        _logPerf('request_data_error error=$e');
+      }
+    });
+  }
+
   void _logPerf(String message) {
     try {
       final storage = html.window.localStorage;
@@ -716,6 +741,8 @@ class WebVideoRecorder {
     }
     _drawTimer?.cancel();
     _memoryCleanupTimer?.cancel();
+    _perfLogTimer?.cancel();
+    _requestDataTimer?.cancel();
     _cameraStream?.getTracks().forEach((track) {
       track.stop();
     });
