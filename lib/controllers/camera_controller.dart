@@ -236,19 +236,21 @@ class CameraRecordingController extends GetxController {
   Future<String?> stopVideoRecording() async {
     try {
       if (!isRecordingVideo.value) {
+        print('⚠️ Registrazione video già fermata, ignoro chiamata duplicata');
         return null;
       }
+
+      // Segna subito come non in registrazione per evitare chiamate duplicate
+      isRecordingVideo.value = false;
 
       if (kIsWeb) {
         // Modalità web con salvataggio reale
         if (_webRecorder != null && _webRecorder!.isRecording) {
           final fileName = await _webRecorder!.stopRecording();
-          isRecordingVideo.value = false;
           videoPath.value = 'Web: $fileName (salvato in Download)';
           print('✅ Video web salvato: $fileName');
           return videoPath.value;
         } else {
-          isRecordingVideo.value = false;
           return null;
         }
       }

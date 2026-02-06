@@ -105,6 +105,12 @@ class MatchController extends GetxController {
   }
 
   void stopRecording() async {
+    // Previeni doppie chiamate
+    if (!isRecording.value) {
+      print('⚠️ Registrazione già fermata, ignoro chiamata duplicata');
+      return;
+    }
+    
     isRecording.value = false;
     _recordingTimer?.cancel(); // Ferma timer registrazione
     

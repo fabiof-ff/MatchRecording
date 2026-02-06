@@ -82,6 +82,12 @@ class WebVideoRecorder {
   
   /// Avvia la registrazione video web con overlay
   Future<void> startRecording() async {
+    // Previeni doppie chiamate
+    if (_isRecording) {
+      print('⚠️ Registrazione già in corso, ignoro chiamata duplicata');
+      return;
+    }
+    
     try {
       // Setup listener per visibilità pagina
       _setupVisibilityListener();
@@ -235,7 +241,7 @@ class WebVideoRecorder {
         }
       }
 
-      // Crea MediaRecorder dal canvas stream
+      // Crea MediaRecorder dal canvas stream con chunk di 15 secondi
       _mediaRecorder = html.MediaRecorder(_canvasStream!, {
         'mimeType': _mimeType,
       });
@@ -251,18 +257,22 @@ class WebVideoRecorder {
           _recordedChunks.add(blobEvent.data!);
           final sizeMB = blobEvent.data!.size / (1024 * 1024);
           print('📦 Chunk ricevuto: ${sizeMB.toStringAsFixed(2)} MB - Totale chunks: ${_recordedChunks.length}');
+        } else {
+          print('⚠️ Chunk vuoto ricevuto');
         }
       });
 
-      // Avvia la registrazione con timeslice di 10 secondi per iOS
-      // Questo genera chunk ogni 10s invece di accumulare tutto in memoria
-      _mediaRecorder!.start(10000); // 10000ms = 10 secondi
+      // Avvia la registrazione con timeslice di 30 secondi
+      // Ottimizzato per iPhone SE con registrazioni lunghe (1 ora)
+      // 30s = 120 chunk/ora invece di 240, riduce carico memoria del 50%
+      _mediaRecorder!.start(30000); // 30000ms = 30 secondi
       _isRecording = true;
       
-      // Avvia timer di pulizia memoria ogni 30 secondi
+      // Avvia timer di pulizia memoria ogni 20 secondi
       _startMemoryCleanup();
 
       print('🎥 Registrazione web avviata');
+      print('📹 Genererò un chunk ogni 30 secondi (ottimizzato per iPhone SE)');
     } catch (e) {
       print('❌ Errore avvio registrazione web: $e');
       rethrow;
@@ -275,53 +285,85 @@ class WebVideoRecorder {
       throw Exception('Nessuna registrazione in corso');
     }
 
-    final completer = Completer<String>();
-
-    // Ascolta l'evento di stop
-    _mediaRecorder!.addEventListener('stop', (event) {
-      try {
-        // Combina tutti i segmenti consolidati + chunk rimanenti
-        final List<html.Blob> allBlobs = [..._allVideoSegments, ..._recordedChunks];
-        print('📦 Creazione video finale da ${allBlobs.length} segmenti/chunks');
-        
-        // Crea un blob dal video registrato con il tipo corretto
-        final blob = html.Blob(allBlobs, _mimeType);
-        
-        // Crea nome file con timestamp ed estensione corretta
-        final timestamp = DateTime.now();
-        final fileName = 'match_${timestamp.year}${timestamp.month.toString().padLeft(2, '0')}${timestamp.day.toString().padLeft(2, '0')}_${timestamp.hour.toString().padLeft(2, '0')}${timestamp.minute.toString().padLeft(2, '0')}.$_fileExtension';
-
-        // Crea URL per il blob
-        final url = html.Url.createObjectUrlFromBlob(blob);
-
-        // Crea elemento anchor per il download
-        final anchor = html.AnchorElement(href: url)
-          ..setAttribute('download', fileName)
-          ..style.display = 'none';
-
-        // Aggiungi al DOM, clicca e rimuovi
-        html.document.body?.append(anchor);
-        anchor.click();
-        anchor.remove();
-
-        // Rilascia l'URL
-        html.Url.revokeObjectUrl(url);
-
-        final sizeMB = (blob.size / (1024 * 1024)).toStringAsFixed(2);
-        
-        print('✅ Video salvato: $fileName');
-        print('📊 Dimensione: $sizeMB MB');
-
-        completer.complete(fileName);
-      } catch (e) {
-        print('❌ Errore nel salvataggio: $e');
-        completer.completeError(e);
-      }
-    });
-
-    // Ferma la registrazione
-    _mediaRecorder!.stop();
+    // Previeni chiamate multiple - segna subito come non in registrazione
     _isRecording = false;
+
+    final completer = Completer<String>();
+    
+    print('🛑 Fermo registrazione, chunk attuali: ${_recordedChunks.length}, segmenti consolidati: ${_allVideoSegments.length}');
+
+    // Ascolta l'evento di stop UNA SOLA VOLTA
+    void handleStop(html.Event event) {
+      // Rimuovi il listener per evitare chiamate multiple
+      _mediaRecorder!.removeEventListener('stop', handleStop);
+      
+      // Aspetta un attimo per assicurarsi che l'ultimo chunk sia arrivato
+      Future.delayed(const Duration(milliseconds: 500), () {
+        try {
+          // Combina tutti i segmenti consolidati + chunk rimanenti
+          final List<html.Blob> allBlobs = [..._allVideoSegments, ..._recordedChunks];
+          print('📦 Creazione video finale da ${allBlobs.length} segmenti/chunks');
+          print('📊 Segmenti consolidati: ${_allVideoSegments.length}');
+          print('📊 Chunks rimanenti: ${_recordedChunks.length}');
+          
+          if (allBlobs.isEmpty) {
+            print('❌ Nessun dato video da salvare!');
+            completer.completeError('Nessun dato video disponibile');
+            return;
+          }
+          
+          // Crea un blob dal video registrato con il tipo corretto
+          final blob = html.Blob(allBlobs, _mimeType);
+          
+          // Crea nome file con timestamp ed estensione corretta
+          final timestamp = DateTime.now();
+          final fileName = 'match_${timestamp.year}${timestamp.month.toString().padLeft(2, '0')}${timestamp.day.toString().padLeft(2, '0')}_${timestamp.hour.toString().padLeft(2, '0')}${timestamp.minute.toString().padLeft(2, '0')}.$_fileExtension';
+
+          // Crea URL per il blob
+          final url = html.Url.createObjectUrlFromBlob(blob);
+
+          // Crea elemento anchor per il download
+          final anchor = html.AnchorElement(href: url)
+            ..setAttribute('download', fileName)
+            ..style.display = 'none';
+
+          // Aggiungi al DOM, clicca e rimuovi
+          html.document.body?.append(anchor);
+          anchor.click();
+          anchor.remove();
+
+          // Rilascia l'URL
+          html.Url.revokeObjectUrl(url);
+
+          final sizeMB = (blob.size / (1024 * 1024)).toStringAsFixed(2);
+          
+          print('✅ Video salvato: $fileName');
+          print('📊 Dimensione totale: $sizeMB MB');
+
+          completer.complete(fileName);
+        } catch (e) {
+          print('❌ Errore nel salvataggio: $e');
+          completer.completeError(e);
+        }
+      });
+    }
+    
+    // Registra il listener per l'evento stop
+    _mediaRecorder!.addEventListener('stop', handleStop);
+
+    // Richiedi esplicitamente l'ultimo chunk prima di fermare
+    try {
+      _mediaRecorder!.requestData();
+      print('📤 Richiesto ultimo chunk prima dello stop');
+    } catch (e) {
+      print('⚠️ Non è stato possibile richiedere l\'ultimo chunk: $e');
+    }
+    
+    // Aspetta un momento per dare tempo al chunk di essere generato
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    // Ferma la registrazione - questo triggerera' l'evento onStop
+    _mediaRecorder!.stop();
 
     // Ferma il timer di disegno
     _drawTimer?.cancel();
@@ -530,10 +572,11 @@ class WebVideoRecorder {
   /// Verifica se è in pausa per motivi di sistema
   bool get isPausedBySystem => _isPausedBySystem;
   
-  /// Avvia timer di pulizia periodica memoria (ogni 30 secondi)
+  /// Avvia timer di pulizia periodica memoria (ogni 20 secondi)
+  /// Ottimizzato per iPhone SE con memoria limitata
   void _startMemoryCleanup() {
     _memoryCleanupTimer?.cancel();
-    _memoryCleanupTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+    _memoryCleanupTimer = Timer.periodic(const Duration(seconds: 20), (_) {
       if (!_isRecording || _recordedChunks.isEmpty) return;
       
       final chunksCount = _recordedChunks.length;
@@ -542,10 +585,11 @@ class WebVideoRecorder {
       
       print('🧹 Pulizia memoria - Chunks: $chunksCount, Dimensione: ${sizeMB.toStringAsFixed(2)} MB');
       
-      // Se ci sono più di 60 chunk (circa 10 minuti di registrazione a 10s/chunk)
-      // consolida i chunk in un blob unico e pulisci
-      if (chunksCount > 60) {
-        print('⚠️ Troppi chunk in memoria, consolido...');
+      // Se ci sono più di 30 chunk (15 minuti con chunk da 30s)
+      // consolida i chunk in un blob unico per liberare memoria
+      // Per 1 ora avrai 4 consolidamenti invece di tenere 120 chunk in memoria
+      if (chunksCount > 30) {
+        print('⚠️ Troppi chunk in memoria ($chunksCount), consolido...');
         _consolidateChunks();
       }
     });
