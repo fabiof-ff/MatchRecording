@@ -84065,7 +84065,7 @@ n.dx=J.aIp(c,"video/mp4")?"mp4":"webm"
 A.rs("\ud83c\udfac Formato video supportato: "+n.db)
 break}}a=n.b
 a.toString
-n.c=A.aLL(a,A.a1(["mimeType",n.db],a0,a0))
+n.c=A.aLL(a,A.a1(["mimeType",n.db,"videoBitsPerSecond",15e5,"audioBitsPerSecond",96e3],a0,a0))
 B.b.S(n.d)
 B.b.S(n.e)
 n.at=n.Q=0
@@ -84339,7 +84339,7 @@ s=p.d
 r=s.length
 q=""+r
 A.aR("\ud83e\uddf9 Pulizia memoria - Chunks: "+q+", Dimensione: "+B.d.a9(B.b.tR(s,0,new A.aj9())/1048576,2)+" MB")
-if(r>30){A.aR("\u26a0\ufe0f Troppi chunk in memoria ("+q+"), consolido...")
+if(r>10){A.aR("\u26a0\ufe0f Troppi chunk in memoria ("+q+"), consolido...")
 p.a2Z()}},
 $S:31}
 A.aj9.prototype={
