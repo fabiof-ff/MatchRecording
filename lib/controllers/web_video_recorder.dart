@@ -23,8 +23,10 @@ class WebVideoRecorder {
   int _totalChunkBytes = 0;
   
   html.CanvasElement? _canvas;
+  html.CanvasElement? _overlayCanvas;
   html.VideoElement? _videoElement;
   Timer? _drawTimer;
+  Timer? _overlayTimer;
   int _frameCount = 0;
   String _mimeType = 'video/webm;codecs=vp9';
   String _fileExtension = 'webm';
@@ -202,11 +204,13 @@ class WebVideoRecorder {
       print('📐 Dimensioni video: ${videoWidth}x${videoHeight}');
       
       _canvas = html.CanvasElement(width: videoWidth, height: videoHeight);
+      _overlayCanvas = html.CanvasElement(width: videoWidth, height: videoHeight);
       final ctx = _canvas!.context2D;
+      final overlayCtx = _overlayCanvas!.context2D;
 
       // Cattura stream dal canvas PRIMA di iniziare a disegnare
       // captureStream() senza parametri cattura ogni volta che il canvas viene modificato
-      _canvasStream = _canvas!.captureStream(1);
+      _canvasStream = _canvas!.captureStream(30);
       
       // Aggiungi audio track dalla camera
       final audioTracks = _cameraStream!.getAudioTracks();
@@ -214,8 +218,9 @@ class WebVideoRecorder {
         _canvasStream!.addTrack(audioTracks.first);
       }
 
-      // Disegna frame con overlay ripetutamente (15 FPS - ottimizzato per iOS)
-      _drawTimer = Timer.periodic(const Duration(milliseconds: 1000), (_) {
+      // Disegna il video a 30 FPS, overlay aggiornato separatamente a 1 FPS
+      _startOverlayTimer(overlayCtx, videoWidth, videoHeight);
+      _drawTimer = Timer.periodic(const Duration(milliseconds: 33), (_) {
         if (_canvas == null || _videoElement == null || ctx == null) return;
         
         // Verifica che il video sia in riproduzione
@@ -228,9 +233,11 @@ class WebVideoRecorder {
         
         // Disegna il video
         ctx.drawImageScaled(_videoElement!, 0, 0, videoWidth, videoHeight);
-        
-        // Disegna overlay (leggerà i valori aggiornati delle variabili)
-        _drawOverlay(ctx, videoWidth, videoHeight);
+
+        // Disegna overlay pre-renderizzato (1 FPS)
+        if (_overlayCanvas != null) {
+          ctx.drawImageScaled(_overlayCanvas!, 0, 0, videoWidth, videoHeight);
+        }
       });
 
       // Determina il mimeType supportato dal browser
@@ -393,6 +400,8 @@ class WebVideoRecorder {
     // Ferma il timer di disegno
     _drawTimer?.cancel();
     _drawTimer = null;
+    _overlayTimer?.cancel();
+    _overlayTimer = null;
     
     // Ferma il timer di cleanup memoria
     _memoryCleanupTimer?.cancel();
@@ -663,6 +672,21 @@ class WebVideoRecorder {
     });
   }
 
+  void _startOverlayTimer(html.CanvasRenderingContext2D overlayCtx, int width, int height) {
+    _overlayTimer?.cancel();
+
+    void drawOverlayFrame() {
+      if (!_isRecording) return;
+      overlayCtx.clearRect(0, 0, width, height);
+      _drawOverlay(overlayCtx, width, height);
+    }
+
+    drawOverlayFrame();
+    _overlayTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      drawOverlayFrame();
+    });
+  }
+
   void _startRequestDataTimer() {
     _requestDataTimer?.cancel();
     _requestDataTimer = Timer.periodic(const Duration(seconds: 5), (_) {
@@ -741,6 +765,7 @@ class WebVideoRecorder {
     }
     _drawTimer?.cancel();
     _memoryCleanupTimer?.cancel();
+    _overlayTimer?.cancel();
     _perfLogTimer?.cancel();
     _requestDataTimer?.cancel();
     _cameraStream?.getTracks().forEach((track) {
