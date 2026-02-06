@@ -11,13 +11,10 @@ class WebVideoRecorder {
   html.MediaStream? _canvasStream;
   html.MediaRecorder? _mediaRecorder;
   final List<html.Blob> _recordedChunks = [];
-  final List<html.Blob> _allVideoSegments = []; // Per salvare segmenti multipli
   bool _isRecording = false;
   bool _isPausedBySystem = false; // Flag per pausa da sistema
   bool _isSavingPartialVideo = false; // Flag per evitare salvataggi multipli
-  Timer? _memoryCleanupTimer; // Timer per pulizia periodica memoria
   Timer? _perfLogTimer; // Timer per log performance
-  Timer? _requestDataTimer; // Timer per forzare dataavailable su iOS
   int _segmentCount = 0; // Contatore segmenti video
   DateTime? _recordingStart;
   int _totalChunkBytes = 0;
@@ -266,7 +263,6 @@ class WebVideoRecorder {
       });
 
       _recordedChunks.clear();
-      _allVideoSegments.clear();
       _segmentCount = 0;
       _totalChunkBytes = 0;
 
@@ -277,31 +273,27 @@ class WebVideoRecorder {
           _recordedChunks.add(blobEvent.data!);
           _totalChunkBytes += blobEvent.data!.size;
           final sizeMB = blobEvent.data!.size / (1024 * 1024);
-          print('📦 Chunk ricevuto: ${sizeMB.toStringAsFixed(2)} MB - Totale chunks: ${_recordedChunks.length}');
-          _logPerf('chunk size_mb=${sizeMB.toStringAsFixed(2)} chunks=${_recordedChunks.length} segments=${_segmentCount} total_mb=${(_totalChunkBytes / (1024 * 1024)).toStringAsFixed(2)}');
-        } else {
-          print('⚠️ Chunk vuoto ricevuto');
+          
+          // Log ogni 10 chunk per non intasare la console
+          if (_recordedChunks.length % 10 == 0) {
+            print('📦 Chunk ricevuto #${_recordedChunks.length}: ${sizeMB.toStringAsFixed(2)} MB - Totale: ${(_totalChunkBytes / (1024 * 1024)).toStringAsFixed(2)} MB');
+          }
+          _logPerf('chunk size_mb=${sizeMB.toStringAsFixed(2)} chunks=${_recordedChunks.length} total_mb=${(_totalChunkBytes / (1024 * 1024)).toStringAsFixed(2)}');
         }
       });
 
-      // Avvia la registrazione con timeslice di 30 secondi
-      // Ottimizzato per iPhone SE con registrazioni lunghe (1 ora)
-      // 30s = 120 chunk/ora invece di 240, riduce carico memoria del 50%
-      _mediaRecorder!.start(30000); // 30000ms = 30 secondi
+      // Avvia la registrazione con timeslice di 2 secondi
+      // Un timeslice breve garantisce che i dati vengano scritti regolarmente,
+      // migliorando la stabilità dei timestamp e prevenendo perdite di dati.
+      _mediaRecorder!.start(2000); // 2000ms = 2 secondi
       _isRecording = true;
       _recordingStart = DateTime.now();
       
-      // Avvia timer di pulizia memoria ogni 20 secondi
-      _startMemoryCleanup();
-
       // Avvia log performance ogni 10 secondi
       _startPerfLogging();
 
-      // Forza dataavailable ogni 5s (workaround iOS)
-      _startRequestDataTimer();
-
       print('🎥 Registrazione web avviata');
-      print('📹 Genererò un chunk ogni 30 secondi (ottimizzato per iPhone SE)');
+      print('📹 Genererò un chunk ogni 2 secondi per massima stabilità');
       _logPerf('recording_start mime=$_mimeType video=${_videoElement?.videoWidth}x${_videoElement?.videoHeight} audio_tracks=${_cameraStream?.getAudioTracks().length ?? 0}');
     } catch (e) {
       print('❌ Errore avvio registrazione web: $e');
@@ -321,31 +313,29 @@ class WebVideoRecorder {
 
     final completer = Completer<String>();
     
-    print('🛑 Fermo registrazione, chunk attuali: ${_recordedChunks.length}, segmenti consolidati: ${_allVideoSegments.length}');
-    _logPerf('recording_stop requested chunks=${_recordedChunks.length} segments=${_allVideoSegments.length}');
+    print('🛑 Fermo registrazione, chunks raccolti: ${_recordedChunks.length}');
+    _logPerf('recording_stop requested chunks=${_recordedChunks.length}');
 
     // Ascolta l'evento di stop UNA SOLA VOLTA
     void handleStop(html.Event event) {
       // Rimuovi il listener per evitare chiamate multiple
       _mediaRecorder!.removeEventListener('stop', handleStop);
       
-      // Aspetta un attimo per assicurarsi che l'ultimo chunk sia arrivato
+      // Aspetta un momento per assicurarsi che l'ultimo chunk sia arrivato ed elaborato
       Future.delayed(const Duration(milliseconds: 500), () {
         try {
-          // Combina tutti i segmenti consolidati + chunk rimanenti
-          final List<html.Blob> allBlobs = [..._allVideoSegments, ..._recordedChunks];
-          print('📦 Creazione video finale da ${allBlobs.length} segmenti/chunks');
-          print('📊 Segmenti consolidati: ${_allVideoSegments.length}');
-          print('📊 Chunks rimanenti: ${_recordedChunks.length}');
-          
-          if (allBlobs.isEmpty) {
+          if (_recordedChunks.isEmpty) {
             print('❌ Nessun dato video da salvare!');
             completer.completeError('Nessun dato video disponibile');
             return;
           }
           
-          // Crea un blob dal video registrato con il tipo corretto
-          final blob = html.Blob(allBlobs, _mimeType);
+          print('📦 Creazione blob finale da ${_recordedChunks.length} chunks');
+          
+          // Crea un blob unico direttamente dai chunks originali.
+          // NON avvolgere i chunks in altri blob intermedi durante la registrazione,
+          // altrimenti i metadati (EBML) potrebbero corrompersi causando durate errate.
+          final blob = html.Blob(_recordedChunks, _mimeType);
           
           // Crea nome file con timestamp ed estensione corretta
           final timestamp = DateTime.now();
@@ -405,15 +395,8 @@ class WebVideoRecorder {
     _overlayTimer?.cancel();
     _overlayTimer = null;
     
-    // Ferma il timer di cleanup memoria
-    _memoryCleanupTimer?.cancel();
-    _memoryCleanupTimer = null;
-
     _perfLogTimer?.cancel();
     _perfLogTimer = null;
-
-    _requestDataTimer?.cancel();
-    _requestDataTimer = null;
 
     // Ferma tutti i track degli stream
     _cameraStream?.getTracks().forEach((track) {
@@ -614,54 +597,6 @@ class WebVideoRecorder {
   /// Verifica se è in pausa per motivi di sistema
   bool get isPausedBySystem => _isPausedBySystem;
   
-  /// Avvia timer di pulizia periodica memoria (ogni 20 secondi)
-  /// Ottimizzato per iPhone SE con memoria limitata
-  void _startMemoryCleanup() {
-    _memoryCleanupTimer?.cancel();
-    _memoryCleanupTimer = Timer.periodic(const Duration(seconds: 20), (_) {
-      if (!_isRecording || _recordedChunks.isEmpty) return;
-      
-      final chunksCount = _recordedChunks.length;
-      final totalSize = _recordedChunks.fold<int>(0, (sum, blob) => sum + blob.size);
-      final sizeMB = totalSize / (1024 * 1024);
-      
-      print('🧹 Pulizia memoria - Chunks: $chunksCount, Dimensione: ${sizeMB.toStringAsFixed(2)} MB');
-      
-      // Se ci sono più di 10 chunk (5 minuti con chunk da 30s)
-      // consolida i chunk in un blob unico per liberare memoria
-      // Per 1 ora avrai 12 consolidamenti invece di tenere 120 chunk in memoria
-      if (chunksCount > 10) {
-        print('⚠️ Troppi chunk in memoria ($chunksCount), consolido...');
-        _consolidateChunks();
-      }
-    });
-  }
-  
-  /// Consolida i chunk esistenti in un unico blob per liberare memoria
-  void _consolidateChunks() {
-    if (_recordedChunks.isEmpty) return;
-    
-    try {
-      // Crea un blob consolidato con tutti i chunk attuali
-      final consolidatedBlob = html.Blob(_recordedChunks, _mimeType);
-      _allVideoSegments.add(consolidatedBlob);
-      _segmentCount++;
-      
-      final sizeMB = consolidatedBlob.size / (1024 * 1024);
-      print('✅ Segmento #$_segmentCount consolidato: ${sizeMB.toStringAsFixed(2)} MB');
-      _logPerf('segment_consolidated index=$_segmentCount size_mb=${sizeMB.toStringAsFixed(2)}');
-      
-      // Pulisci i chunk dalla memoria
-      _recordedChunks.clear();
-      
-      // Forza garbage collection (suggerimento al browser)
-      print('🗑️ Memoria liberata');
-    } catch (e) {
-      print('❌ Errore consolidamento chunk: $e');
-      _logPerf('segment_consolidate_error error=$e');
-    }
-  }
-
   void _startPerfLogging() {
     _perfLogTimer?.cancel();
     _perfLogTimer = Timer.periodic(const Duration(seconds: 10), (_) {
@@ -670,7 +605,7 @@ class WebVideoRecorder {
       final elapsed = start == null ? 0 : DateTime.now().difference(start).inSeconds;
       final chunksCount = _recordedChunks.length;
       final totalMb = _totalChunkBytes / (1024 * 1024);
-      _logPerf('heartbeat elapsed_s=$elapsed chunks=$chunksCount segments=$_segmentCount total_mb=${totalMb.toStringAsFixed(2)}');
+      _logPerf('heartbeat elapsed_s=$elapsed chunks=$chunksCount total_mb=${totalMb.toStringAsFixed(2)}');
     });
   }
 
@@ -686,19 +621,6 @@ class WebVideoRecorder {
     drawOverlayFrame();
     _overlayTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       drawOverlayFrame();
-    });
-  }
-
-  void _startRequestDataTimer() {
-    _requestDataTimer?.cancel();
-    _requestDataTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      if (!_isRecording || _mediaRecorder == null) return;
-      try {
-        _mediaRecorder!.requestData();
-        _logPerf('request_data tick');
-      } catch (e) {
-        _logPerf('request_data_error error=$e');
-      }
     });
   }
 
@@ -766,10 +688,8 @@ class WebVideoRecorder {
       _mediaRecorder?.stop();
     }
     _drawTimer?.cancel();
-    _memoryCleanupTimer?.cancel();
     _overlayTimer?.cancel();
     _perfLogTimer?.cancel();
-    _requestDataTimer?.cancel();
     _cameraStream?.getTracks().forEach((track) {
       track.stop();
     });
@@ -777,6 +697,5 @@ class WebVideoRecorder {
       track.stop();
     });
     _recordedChunks.clear();
-    _allVideoSegments.clear();
   }
 }
