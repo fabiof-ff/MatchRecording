@@ -258,9 +258,11 @@ class WebVideoRecorder {
         }
       }
 
-      // Crea MediaRecorder dal canvas stream con chunk di 15 secondi
+      // Crea MediaRecorder dal canvas stream con bitrate ridotto (se supportato)
       _mediaRecorder = html.MediaRecorder(_canvasStream!, {
         'mimeType': _mimeType,
+        'videoBitsPerSecond': 1500000,
+        'audioBitsPerSecond': 96000,
       });
 
       _recordedChunks.clear();
@@ -625,10 +627,10 @@ class WebVideoRecorder {
       
       print('🧹 Pulizia memoria - Chunks: $chunksCount, Dimensione: ${sizeMB.toStringAsFixed(2)} MB');
       
-      // Se ci sono più di 30 chunk (15 minuti con chunk da 30s)
+      // Se ci sono più di 10 chunk (5 minuti con chunk da 30s)
       // consolida i chunk in un blob unico per liberare memoria
-      // Per 1 ora avrai 4 consolidamenti invece di tenere 120 chunk in memoria
-      if (chunksCount > 30) {
+      // Per 1 ora avrai 12 consolidamenti invece di tenere 120 chunk in memoria
+      if (chunksCount > 10) {
         print('⚠️ Troppi chunk in memoria ($chunksCount), consolido...');
         _consolidateChunks();
       }
