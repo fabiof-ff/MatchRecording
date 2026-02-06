@@ -55,6 +55,7 @@
   <script>
     (function () {
       var LOG_KEY = 'mr_error_log';
+      var PERF_KEY = 'mr_perf_log';
       var MAX_LINES = 200;
 
       function loadLogs() {
@@ -63,6 +64,24 @@
         } catch (e) {
           return [];
         }
+      }
+
+      function loadPerfLogs() {
+        try {
+          return JSON.parse(localStorage.getItem(PERF_KEY) || '[]');
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function loadAllLogs() {
+        var errorLogs = loadLogs().map(function (line) {
+          return '[error] ' + line;
+        });
+        var perfLogs = loadPerfLogs().map(function (line) {
+          return '[perf]  ' + line;
+        });
+        return errorLogs.concat(perfLogs);
       }
 
       function saveLogs(lines) {
@@ -90,7 +109,7 @@
         var logs = loadLogs();
         logs.push(entry);
         saveLogs(logs);
-        renderPanel(logs);
+        renderPanel(loadAllLogs());
       }
 
       function createUi() {
@@ -143,6 +162,11 @@
         clearBtn.style.cssText = 'font:11px/1.2 sans-serif;padding:4px 6px;';
         clearBtn.onclick = function () {
           saveLogs([]);
+          try {
+            localStorage.setItem(PERF_KEY, JSON.stringify([]));
+          } catch (e) {
+            // Ignore storage errors.
+          }
           renderPanel([]);
         };
 
@@ -150,7 +174,7 @@
         copyBtn.textContent = 'Copy';
         copyBtn.style.cssText = 'font:11px/1.2 sans-serif;padding:4px 6px;';
         copyBtn.onclick = function () {
-          var logs = loadLogs().join('\n\n---\n\n');
+          var logs = loadAllLogs().join('\n\n---\n\n');
           if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(logs);
           } else {
@@ -174,7 +198,7 @@
 
         button.onclick = function () {
           panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-          renderPanel(loadLogs());
+          renderPanel(loadAllLogs());
         };
 
         document.body.appendChild(button);

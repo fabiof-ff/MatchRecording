@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:html' as html;
 import 'dart:js' as js;
 import 'package:flutter/material.dart';
@@ -15,7 +16,10 @@ class WebVideoRecorder {
   bool _isPausedBySystem = false; // Flag per pausa da sistema
   bool _isSavingPartialVideo = false; // Flag per evitare salvataggi multipli
   Timer? _memoryCleanupTimer; // Timer per pulizia periodica memoria
+  Timer? _perfLogTimer; // Timer per log performance
   int _segmentCount = 0; // Contatore segmenti video
+  DateTime? _recordingStart;
+  int _totalChunkBytes = 0;
   
   html.CanvasElement? _canvas;
   html.VideoElement? _videoElement;
@@ -249,14 +253,17 @@ class WebVideoRecorder {
       _recordedChunks.clear();
       _allVideoSegments.clear();
       _segmentCount = 0;
+      _totalChunkBytes = 0;
 
       // Ascolta i dati registrati
       _mediaRecorder!.addEventListener('dataavailable', (event) {
         final blobEvent = event as html.BlobEvent;
         if (blobEvent.data != null && blobEvent.data!.size > 0) {
           _recordedChunks.add(blobEvent.data!);
+          _totalChunkBytes += blobEvent.data!.size;
           final sizeMB = blobEvent.data!.size / (1024 * 1024);
           print('📦 Chunk ricevuto: ${sizeMB.toStringAsFixed(2)} MB - Totale chunks: ${_recordedChunks.length}');
+          _logPerf('chunk size_mb=${sizeMB.toStringAsFixed(2)} chunks=${_recordedChunks.length} segments=${_segmentCount} total_mb=${(_totalChunkBytes / (1024 * 1024)).toStringAsFixed(2)}');
         } else {
           print('⚠️ Chunk vuoto ricevuto');
         }
@@ -267,14 +274,20 @@ class WebVideoRecorder {
       // 30s = 120 chunk/ora invece di 240, riduce carico memoria del 50%
       _mediaRecorder!.start(30000); // 30000ms = 30 secondi
       _isRecording = true;
+      _recordingStart = DateTime.now();
       
       // Avvia timer di pulizia memoria ogni 20 secondi
       _startMemoryCleanup();
 
+      // Avvia log performance ogni 10 secondi
+      _startPerfLogging();
+
       print('🎥 Registrazione web avviata');
       print('📹 Genererò un chunk ogni 30 secondi (ottimizzato per iPhone SE)');
+      _logPerf('recording_start mime=$_mimeType video=${_videoElement?.videoWidth}x${_videoElement?.videoHeight} audio_tracks=${_cameraStream?.getAudioTracks().length ?? 0}');
     } catch (e) {
       print('❌ Errore avvio registrazione web: $e');
+      _logPerf('recording_start_error error=$e');
       rethrow;
     }
   }
@@ -291,6 +304,7 @@ class WebVideoRecorder {
     final completer = Completer<String>();
     
     print('🛑 Fermo registrazione, chunk attuali: ${_recordedChunks.length}, segmenti consolidati: ${_allVideoSegments.length}');
+    _logPerf('recording_stop requested chunks=${_recordedChunks.length} segments=${_allVideoSegments.length}');
 
     // Ascolta l'evento di stop UNA SOLA VOLTA
     void handleStop(html.Event event) {
@@ -339,10 +353,12 @@ class WebVideoRecorder {
           
           print('✅ Video salvato: $fileName');
           print('📊 Dimensione totale: $sizeMB MB');
+          _logPerf('recording_saved file=$fileName size_mb=$sizeMB');
 
           completer.complete(fileName);
         } catch (e) {
           print('❌ Errore nel salvataggio: $e');
+          _logPerf('recording_save_error error=$e');
           completer.completeError(e);
         }
       });
@@ -372,6 +388,9 @@ class WebVideoRecorder {
     // Ferma il timer di cleanup memoria
     _memoryCleanupTimer?.cancel();
     _memoryCleanupTimer = null;
+
+    _perfLogTimer?.cancel();
+    _perfLogTimer = null;
 
     // Ferma tutti i track degli stream
     _cameraStream?.getTracks().forEach((track) {
@@ -607,6 +626,7 @@ class WebVideoRecorder {
       
       final sizeMB = consolidatedBlob.size / (1024 * 1024);
       print('✅ Segmento #$_segmentCount consolidato: ${sizeMB.toStringAsFixed(2)} MB');
+      _logPerf('segment_consolidated index=$_segmentCount size_mb=${sizeMB.toStringAsFixed(2)}');
       
       // Pulisci i chunk dalla memoria
       _recordedChunks.clear();
@@ -615,6 +635,40 @@ class WebVideoRecorder {
       print('🗑️ Memoria liberata');
     } catch (e) {
       print('❌ Errore consolidamento chunk: $e');
+      _logPerf('segment_consolidate_error error=$e');
+    }
+  }
+
+  void _startPerfLogging() {
+    _perfLogTimer?.cancel();
+    _perfLogTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      if (!_isRecording) return;
+      final start = _recordingStart;
+      final elapsed = start == null ? 0 : DateTime.now().difference(start).inSeconds;
+      final chunksCount = _recordedChunks.length;
+      final totalMb = _totalChunkBytes / (1024 * 1024);
+      _logPerf('heartbeat elapsed_s=$elapsed chunks=$chunksCount segments=$_segmentCount total_mb=${totalMb.toStringAsFixed(2)}');
+    });
+  }
+
+  void _logPerf(String message) {
+    try {
+      final storage = html.window.localStorage;
+      if (storage == null) return;
+
+        final existing = storage['mr_perf_log'];
+        final List<String> logs = existing == null
+          ? <String>[]
+          : (existing.isEmpty ? <String>[] : (jsonDecode(existing) as List).cast<String>());
+
+      final entry = '${DateTime.now().toIso8601String()} $message';
+      logs.add(entry);
+
+      const maxLines = 200;
+      final trimmed = logs.length > maxLines ? logs.sublist(logs.length - maxLines) : logs;
+      storage['mr_perf_log'] = jsonEncode(trimmed);
+    } catch (e) {
+      // Ignore logging failures.
     }
   }
 
